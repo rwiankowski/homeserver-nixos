@@ -4,6 +4,8 @@ A complete, production-ready NixOS configuration for self-hosting 15+ services w
 
 > **Perfect for**: Home lab enthusiasts, privacy-conscious users, and anyone wanting to self-host their digital life with minimal maintenance.
 
+> DISCLAIMER - this entire project was vibe-engineered with claude.ai 
+
 ## ✨ Features
 
 ### 🎬 Media & Entertainment
@@ -269,8 +271,7 @@ If you find this useful, please give it a star! ⭐
 
 ## 📮 Contact
 
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Mastodon: [@yourusername@instance.social](https://mastodon.instance.social/@yourusername)
+- GitHub: [@rwiankowski](https://github.com/rwiankowski)
 
 ---
 
