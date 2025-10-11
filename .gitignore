@@ -1,0 +1,37 @@
+# .gitignore
+# =========
+
+# Hardware configuration (machine-specific, generated per-server)
+hardware-configuration.nix
+
+# Nix build results
+result
+result-*
+.nix-*
+
+# direnv (if using)
+.direnv/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Private keys (unencrypted)
+key.txt
+*.key
+*.pem
+/var/lib/sops-nix/key.txt
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# IMPORTANT: secrets.yaml IS committed (it's encrypted by sops)
+# Only ignore if accidentally unencrypted
+# secrets/secrets.yaml
+

@@ -1,0 +1,64 @@
+# vars.nix.example
+# =================
+# Example variables file. Copy this to vars.nix and customize.
+# Use: cp vars.nix.example vars.nix
+
+{
+  # System settings
+  system = {
+    hostname = "homeserver";          # Change to your preferred hostname
+    timezone = "Europe/Amsterdam";    # Your timezone (timedatectl list-timezones)
+    locale = "en_US.UTF-8";          # Your locale
+  };
+
+  # User configuration
+  users = {
+    admin = {
+      username = "admin";             # YOUR username
+      sshKeys = [
+        # Add your SSH public keys here
+        # Generate with: ssh-keygen -t ed25519
+        # Get public key: cat ~/.ssh/id_ed25519.pub
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... you@laptop"
+      ];
+    };
+  };
+
+  # Domain configuration
+  networking = {
+    baseDomain = "yourdomain.com";           # YOUR domain
+    homeSubdomain = "home";                  # Services will be at: *.home.yourdomain.com
+    homeDomain = "home.yourdomain.com";      # Full domain for services
+    acmeEmail = "you@email.com";             # Email for Let's Encrypt notifications
+  };
+
+  # Service hostnames (subdomain part only)
+  # These become: servicename.home.yourdomain.com
+  services = {
+    authentik = "authentik";
+    jellyfin = "jellyfin";
+    immich = "immich";
+    nextcloud = "nextcloud";
+    mealie = "mealie";
+    homeassistant = "hass";
+    llm = "llm";
+    sonarr = "sonarr";
+    radarr = "radarr";
+    prowlarr = "prowlarr";
+    bazarr = "bazarr";
+    paperless = "paperless";
+    audiobookshelf = "audiobooks";
+    homepage = "home";
+    pgadmin = "pgadmin";
+    grafana = "grafana";
+  };
+
+  # Storage paths - mount points for dedicated disks
+  # These should match the disk labels you created during NixOS installation
+  storage = {
+    media = "/mnt/media";        # HDD - Movies, TV, Music (not backed up)
+    photos = "/mnt/photos";      # SSD - Immich photo library (backed up)
+    docs = "/mnt/docs";          # SSD - NextCloud, Paperless (backed up)
+    shared = "/mnt/shared";      # SSD - App data, databases (backed up)
+  };
+}
