@@ -52,7 +52,7 @@ in {
   # Auto-upgrade system
   system.autoUpgrade = {
     enable = true;
-    flake = "github:rwiankowski/homeserver-nixos";
+    flake = "github:rwiankowski/homeserver-nixos#homeserver";
     flags = [ "--update-input" "nixpkgs" "--commit-lock-file" ];
     dates = "weekly";
   };
