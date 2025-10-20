@@ -17,6 +17,6 @@ in {
       "${vars.storage.shared}/audiobookshelf/config:/config"
       "${vars.storage.shared}/audiobookshelf/metadata:/metadata"
     ];
-    user = "media:media";
+
   };
 }

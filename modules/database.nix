@@ -69,7 +69,7 @@ in {
   # pgAdmin for database management
   services.pgadmin = {
     enable = true;
-    initialEmail = "admin@${vars.networking.domain}";
+    initialEmail = "${vars.networking.acmeEmail}";
     initialPasswordFile = "/etc/pgadmin-password";
     
     settings = {

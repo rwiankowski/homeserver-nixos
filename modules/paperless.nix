@@ -19,7 +19,7 @@ in {
       PAPERLESS_DBHOST = "/run/postgresql";
       PAPERLESS_DBNAME = "paperless";
       PAPERLESS_DBUSER = "paperless";
-      PAPERLESS_URL = "https://${vars.services.paperless}.${vars.networking.domain}";
+      PAPERLESS_URL = "https://${vars.services.paperless}.${vars.networking.homeDomain}";
     };
 
     passwordFile = "/etc/paperless-password";

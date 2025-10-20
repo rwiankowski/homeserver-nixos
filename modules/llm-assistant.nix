@@ -27,7 +27,7 @@ in {
 
   services.ollama = {
     enable = true;
-    acceleration = "cuda";
+    acceleration = "rocm";
     openFirewall = false;
     host = "127.0.0.1";
     port = 11434;

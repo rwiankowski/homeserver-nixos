@@ -8,7 +8,7 @@ in {
     ./modules/disk-mounts.nix
     ./modules/networking.nix
     ./modules/security.nix
-    ./modules/crowdsec.nix
+#    ./modules/crowdsec.nix
     ./modules/database.nix
     ./modules/authentik.nix
     ./modules/jellyfin.nix
@@ -75,6 +75,6 @@ in {
     ncdu
   ];
 
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.05";
 }
 

@@ -1,44 +1,57 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   vars = import ../vars.nix;
-  # Construct service URLs: service.home.yourdomain.com
   mkServiceUrl = service: "${service}.${vars.networking.homeDomain}";
+  
+  # Caddy with plugins
+  caddyPkg = pkgs.caddy.withPlugins {
+    plugins = [ "github.com/caddy-dns/azure@v0.6.0" ];
+    hash = "sha256-EBPD0qDOExQxaF3X+PY8NdZWhsgPdYnes8is7E2UV50=";
+  };
+  
+  # Wrapper script that loads credentials and runs caddy
+  caddyWithEnv = pkgs.writeShellScript "caddy-with-env" ''
+    # Load credentials into environment
+    export AZURE_TENANT_ID=$(cat $CREDENTIALS_DIRECTORY/azure_tenant_id)
+    export AZURE_CLIENT_ID=$(cat $CREDENTIALS_DIRECTORY/azure_client_id)
+    export AZURE_CLIENT_SECRET=$(cat $CREDENTIALS_DIRECTORY/azure_client_secret)
+    export AZURE_SUBSCRIPTION_ID=$(cat $CREDENTIALS_DIRECTORY/azure_subscription_id)
+    export AZURE_RESOURCE_GROUP=$(cat $CREDENTIALS_DIRECTORY/azure_resource_group)
+    
+    # Run caddy
+    exec ${caddyPkg}/bin/caddy run --config /etc/caddy/caddy_config --adapter caddyfile
+  '';
 in {
   networking = {
     networkmanager.enable = true;
     
-    # Firewall configuration - NO ports exposed!
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 22 ];  # Only SSH
+      allowedTCPPorts = [ 22 ];
       trustedInterfaces = [ "tailscale0" ];
       checkReversePath = "loose";
     };
   };
 
-  # Tailscale VPN
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "server";
   };
 
-  # Caddy with Let's Encrypt DNS-01 challenge via Azure DNS
   services.caddy = {
     enable = true;
+    package = caddyPkg;
     
-    # Email for Let's Encrypt notifications
     email = vars.networking.acmeEmail;
     
-    # Global Caddy configuration
     globalConfig = ''
-      # Use DNS-01 challenge via Azure DNS
       acme_dns azure {
-        tenant_id {env.AZURE_TENANT_ID}
-        client_id {env.AZURE_CLIENT_ID}
-        client_secret {env.AZURE_CLIENT_SECRET}
-        subscription_id {env.AZURE_SUBSCRIPTION_ID}
-        resource_group_name {env.AZURE_RESOURCE_GROUP}
+        tenant_id {$AZURE_TENANT_ID}
+        client_id {$AZURE_CLIENT_ID}
+        client_secret {$AZURE_CLIENT_SECRET}
+        subscription_id {$AZURE_SUBSCRIPTION_ID}
+        resource_group_name {$AZURE_RESOURCE_GROUP}
       }
       
       servers {
@@ -46,7 +59,6 @@ in {
       }
     '';
     
-    # Log format for CrowdSec parsing
     extraConfig = ''
       (crowdsec_logs) {
         log {
@@ -156,22 +168,23 @@ in {
     };
   };
 
-  # Environment for Caddy to access Azure credentials
+  # Override systemd service to use wrapper and load credentials
   systemd.services.caddy.serviceConfig = {
-    EnvironmentFile = pkgs.writeText "caddy-env" ''
-      AZURE_TENANT_ID_FILE=${config.sops.secrets."azure/tenant_id".path}
-      AZURE_CLIENT_ID_FILE=${config.sops.secrets."azure/client_id".path}
-      AZURE_CLIENT_SECRET_FILE=${config.sops.secrets."azure/client_secret".path}
-      AZURE_SUBSCRIPTION_ID_FILE=${config.sops.secrets."azure/subscription_id".path}
-      AZURE_RESOURCE_GROUP_FILE=${config.sops.secrets."azure/resource_group".path}
-    '';
+    LoadCredential = [
+      "azure_tenant_id:${config.sops.secrets."azure/tenant_id".path}"
+      "azure_client_id:${config.sops.secrets."azure/client_id".path}"
+      "azure_client_secret:${config.sops.secrets."azure/client_secret".path}"
+      "azure_subscription_id:${config.sops.secrets."azure/subscription_id".path}"
+      "azure_resource_group:${config.sops.secrets."azure/resource_group".path}"
+    ];
+    
+    ExecStart = lib.mkForce [ "" caddyWithEnv ];
   };
 
   services.resolved = {
     enable = true;
   };
   
-  # Create log directory for Caddy
   systemd.tmpfiles.rules = [
     "d /var/log/caddy 0755 caddy caddy -"
   ];

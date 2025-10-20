@@ -8,6 +8,7 @@ in {
     image = "ghcr.io/gethomepage/homepage:latest";
     environment = {
       TZ = vars.system.timezone;
+      HOMEPAGE_ALLOWED_HOSTS = "${vars.services.homepage}.${vars.networking.homeDomain}";
     };
     ports = [ "3001:3000" ];
     volumes = [

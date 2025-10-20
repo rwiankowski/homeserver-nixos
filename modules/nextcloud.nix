@@ -5,8 +5,8 @@ let
 in {
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud29;
-    hostName = "${vars.services.nextcloud}.${vars.networking.domain}";
+    package = pkgs.nextcloud31;
+    hostName = "${vars.services.nextcloud}.${vars.networking.homeDomain}";
     datadir = "${vars.storage.docs}/nextcloud";
     
     config = {
@@ -18,7 +18,7 @@ in {
     };
 
     settings = {
-      trusted_domains = [ "${vars.services.nextcloud}.${vars.networking.domain}" ];
+      trusted_domains = [ "${vars.services.nextcloud}.${vars.networking.homeDomain}" ];
       trusted_proxies = [ "127.0.0.1" ];
       overwriteprotocol = "https";
     };
@@ -32,6 +32,23 @@ in {
       "opcache.memory_consumption" = "128";
       "opcache.revalidate_freq" = "1";
       "opcache.fast_shutdown" = "1";
+    };
+  };
+
+    services.nginx = {
+    enable = true;
+    
+    # Don't listen on port 80 - only localhost
+    defaultHTTPListenPort = 8080;
+    defaultListenAddresses = [ "127.0.0.1" ];
+    
+    # Disable the default virtual host
+    virtualHosts = {
+      "${vars.services.nextcloud}.${vars.networking.homeDomain}" = {
+        listen = [
+          { addr = "127.0.0.1"; port = 8080; }
+        ];
+      };
     };
   };
 

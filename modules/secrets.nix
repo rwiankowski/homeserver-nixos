@@ -12,7 +12,7 @@
     secrets = {
       # Database passwords
       "database/authentik_password" = {
-        owner = "authentik";
+        owner = "root";
         mode = "0400";
       };
       "database/immich_password" = {
@@ -20,7 +20,7 @@
         mode = "0400";
       };
       "database/paperless_password" = {
-        owner = "paperless";
+        owner = "root";
         mode = "0400";
       };
       
@@ -34,15 +34,15 @@
         mode = "0400";
       };
       "nextcloud/admin_password" = {
-        owner = "nextcloud";
+        owner = "root";
         mode = "0400";
       };
       "paperless/admin_password" = {
-        owner = "paperless";
+        owner = "root";
         mode = "0400";
       };
       "pgadmin/admin_password" = {
-        owner = "pgadmin";
+        owner = "root";
         mode = "0400";
       };
       
@@ -72,7 +72,7 @@
       
       # Grafana
       "grafana/admin_password" = {
-        owner = "grafana";
+        owner = "root";
         mode = "0400";
       };
       
