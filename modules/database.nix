@@ -70,21 +70,13 @@ in {
   services.pgadmin = {
     enable = true;
     initialEmail = "${vars.networking.acmeEmail}";
-    initialPasswordFile = "/etc/pgadmin-password";
+    initialPasswordFile = config.sops.secrets."pgadmin/admin_password".path;
     
     settings = {
       PGADMIN_LISTEN_ADDRESS = "127.0.0.1";
       PGADMIN_LISTEN_PORT = 5050;
     };
   };
-
-  # Create password file for pgAdmin
-  system.activationScripts.pgadmin-pass = ''
-    if [ ! -f /etc/pgadmin-password ]; then
-      echo "replace-with-secure-password" > /etc/pgadmin-password
-      chmod 600 /etc/pgadmin-password
-    fi
-  '';
 
   # Redis for caching (shared by multiple services)
   services.redis.servers.shared = {
@@ -93,4 +85,3 @@ in {
     bind = "127.0.0.1";
   };
 }
-

@@ -5,14 +5,8 @@ let
 in {
   virtualisation.oci-containers.containers = {
     open-webui = {
-      image = "ghcr.io/open-webui/open-webui:main";
-      environment = {
-        OLLAMA_BASE_URL = "http://host.docker.internal:11434";
-        WEBUI_SECRET_KEY = "replace-with-secret";
-        ENABLE_RAG_WEB_SEARCH = "true";
-        RAG_WEB_SEARCH_ENGINE = "searxng";
-        SEARXNG_QUERY_URL = "http://host.docker.internal:8888/search?q=<query>";
-      };
+      image = "ghcr.io/open-webui/open-webui:v0.4.5";  # Pinned to stable version
+      environmentFiles = [ config.sops.templates."openwebui-env".path ];
       ports = [ "3000:8080" ];
       volumes = [ "${vars.storage.shared}/open-webui:/app/backend/data" ];
       extraOptions = [ "--add-host=host.docker.internal:host-gateway" ];

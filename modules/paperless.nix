@@ -22,14 +22,6 @@ in {
       PAPERLESS_URL = "https://${vars.services.paperless}.${vars.networking.homeDomain}";
     };
 
-    passwordFile = "/etc/paperless-password";
+    passwordFile = config.sops.secrets."paperless/admin_password".path;
   };
-
-  # Create password file
-  system.activationScripts.paperless-pass = ''
-    if [ ! -f /etc/paperless-password ]; then
-      echo "replace-with-secure-password" > /etc/paperless-password
-      chmod 600 /etc/paperless-password
-    fi
-  '';
 }

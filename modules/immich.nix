@@ -6,12 +6,8 @@ in {
   virtualisation.oci-containers.containers = {
     immich-server = {
       image = "ghcr.io/immich-app/immich-server:release";
+      environmentFiles = [ config.sops.templates."immich-env".path ];
       environment = {
-        DB_HOSTNAME = "host.docker.internal";
-        DB_USERNAME = "immich";
-        DB_PASSWORD = "replace-with-password";
-        DB_DATABASE_NAME = "immich";
-        REDIS_HOSTNAME = "host.docker.internal";
         UPLOAD_LOCATION = "${vars.storage.photos}/immich/upload";
       };
       ports = [ "2283:3001" ];

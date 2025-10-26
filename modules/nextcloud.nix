@@ -5,12 +5,12 @@ let
 in {
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud31;
+    package = pkgs.nextcloud32;  # Updated to version 32
     hostName = "${vars.services.nextcloud}.${vars.networking.homeDomain}";
     datadir = "${vars.storage.docs}/nextcloud";
     
     config = {
-      adminpassFile = "/etc/nextcloud-admin-pass";
+      adminpassFile = config.sops.secrets."nextcloud/admin_password".path;
       dbtype = "pgsql";
       dbuser = "nextcloud";
       dbhost = "/run/postgresql";
@@ -35,7 +35,7 @@ in {
     };
   };
 
-    services.nginx = {
+  services.nginx = {
     enable = true;
     
     # Don't listen on port 80 - only localhost
@@ -51,12 +51,4 @@ in {
       };
     };
   };
-
-  system.activationScripts.nextcloud-admin-pass = ''
-    if [ ! -f /etc/nextcloud-admin-pass ]; then
-      echo "replace-with-secure-password" > /etc/nextcloud-admin-pass
-      chmod 600 /etc/nextcloud-admin-pass
-    fi
-  '';
 }
-

@@ -35,16 +35,24 @@ az login
 # Opens browser for authentication
 ```
 
-### Step 3: Create Resource Group
+### Step 3: Create Resource Groups
+
+**IMPORTANT:** This setup uses TWO separate resource groups for better organization:
+- One for DNS management
+- One for backup storage
 
 ```bash
 # Set variables (customize these)
 LOCATION="westeurope"          # Or your preferred region
-RG_NAME="homeserver-resources"
+RG_DNS="homeserver-dns"        # Resource group for DNS
+RG_BACKUPS="homeserver-backups"  # Resource group for backups
 DOMAIN="yourdomain.com"        # YOUR domain
 
-# Create resource group
-az group create --name $RG_NAME --location $LOCATION
+# Create DNS resource group
+az group create --name $RG_DNS --location $LOCATION
+
+# Create Backups resource group
+az group create --name $RG_BACKUPS --location $LOCATION
 ```
 
 ### Step 4: Create DNS Zone
@@ -52,14 +60,14 @@ az group create --name $RG_NAME --location $LOCATION
 If your domain DNS is not yet in Azure:
 
 ```bash
-# Create DNS zone
+# Create DNS zone in DNS resource group
 az network dns zone create \
-  --resource-group $RG_NAME \
+  --resource-group $RG_DNS \
   --name $DOMAIN
 
 # Show nameservers (you'll need these)
 az network dns zone show \
-  --resource-group $RG_NAME \
+  --resource-group $RG_DNS \
   --name $DOMAIN \
   --query nameServers \
   --output table
@@ -69,7 +77,26 @@ az network dns zone show \
 
 Wait 1-24 hours for DNS propagation.
 
-### Step 5: Get Your Tailscale Hostname
+### Step 5: Create Child Zone (Recommended Approach)
+
+Instead of creating a wildcard CNAME directly on your main domain, create a dedicated child zone for home services. This allows Caddy to create TXT records for Let's Encrypt validation without conflicts.
+
+```bash
+# Create child zone for home services
+az network dns zone create \
+  --resource-group $RG_DNS \
+  --name home.$DOMAIN \
+  --parent-name $DOMAIN
+
+# Azure automatically creates NS records in parent zone
+
+# Verify child zone exists
+az network dns zone show \
+  --resource-group $RG_DNS \
+  --name home.$DOMAIN
+```
+
+### Step 6: Get Your Tailscale Hostname
 
 ```bash
 # On your server
@@ -81,55 +108,65 @@ tailscale status
 # Save the hostname: homeserver.tail-scale.ts.net
 ```
 
-### Step 6: Create CNAME Record
+### Step 7: Create CNAME Record in Child Zone
 
 ```bash
 # Set your Tailscale hostname
 TAILSCALE_HOSTNAME="homeserver.tail-scale.ts.net"
 
-# Create wildcard CNAME
+# Create wildcard CNAME in CHILD zone
 az network dns record-set cname create \
-  --resource-group $RG_NAME \
-  --zone-name $DOMAIN \
-  --name "*.home"
+  --resource-group $RG_DNS \
+  --zone-name home.$DOMAIN \
+  --name "*"
 
 az network dns record-set cname set-record \
-  --resource-group $RG_NAME \
-  --zone-name $DOMAIN \
-  --record-set-name "*.home" \
+  --resource-group $RG_DNS \
+  --zone-name home.$DOMAIN \
+  --record-set-name "*" \
   --cname $TAILSCALE_HOSTNAME
 
 # Verify
 az network dns record-set cname show \
-  --resource-group $RG_NAME \
-  --zone-name $DOMAIN \
-  --name "*.home"
+  --resource-group $RG_DNS \
+  --zone-name home.$DOMAIN \
+  --name "*"
 ```
 
-### Step 7: Test DNS Resolution
+**Why use a child zone?**
+- ✅ Caddy can create TXT records for certificate validation
+- ✅ Cleaner separation of home services from main domain
+- ✅ No conflicts with existing DNS records
+- ✅ Better security and management
+
+### Step 8: Test DNS Resolution
 
 ```bash
 # Wait a few minutes, then test
 dig jellyfin.home.$DOMAIN
 
-# Should show CNAME to your Tailscale hostname
+# Should show:
+# jellyfin.home.yourdomain.com. 3600 IN CNAME homeserver.tail-scale.ts.net.
+# homeserver.tail-scale.ts.net. 300 IN A 100.x.x.x
 ```
 
 ---
 
 ## Part 2: Service Principal for DNS-01 Challenge
 
-Caddy needs permission to create TXT records for Let's Encrypt validation.
+Caddy needs permission to create TXT records in the child zone for Let's Encrypt validation.
 
 ### Method 1: Automated Script (Recommended)
 
 ```bash
-# Get DNS zone ID
+# Get DNS child zone ID
 DNS_ZONE_ID=$(az network dns zone show \
-  --name $DOMAIN \
-  --resource-group $RG_NAME \
+  --name home.$DOMAIN \
+  --resource-group $RG_DNS \
   --query id \
   --output tsv)
+
+echo "DNS Zone ID: $DNS_ZONE_ID"
 
 # Create service principal with DNS Zone Contributor role
 SP_OUTPUT=$(az ad sp create-for-rbac \
@@ -149,7 +186,7 @@ SUBSCRIPTION_ID=$(az account show --query id --output tsv)
 echo "=== Save these credentials ==="
 echo $SP_OUTPUT | jq
 echo "subscription_id: $SUBSCRIPTION_ID"
-echo "resource_group: $RG_NAME"
+echo "resource_group: $RG_DNS"
 echo "=============================="
 ```
 
@@ -158,45 +195,9 @@ echo "=============================="
 - `client_id`
 - `client_secret`
 - `subscription_id`
-- `resource_group`
+- `resource_group` (use $RG_DNS)
 
-### Method 2: Azure Portal (If You Prefer UI)
-
-<details>
-<summary>Click to expand Azure Portal instructions</summary>
-
-1. **Create App Registration:**
-   - Azure Portal → Azure Active Directory
-   - App registrations → + New registration
-   - Name: `caddy-dns-challenge`
-   - Supported account types: Single tenant
-   - Register
-   - **Copy Application (client) ID**
-   - **Copy Directory (tenant) ID**
-
-2. **Create Client Secret:**
-   - In the app → Certificates & secrets
-   - + New client secret
-   - Description: `caddy-dns`
-   - Expires: 24 months
-   - Add
-   - **Copy the secret VALUE** (you won't see it again!)
-
-3. **Grant DNS Permissions:**
-   - Navigate to your DNS Zone
-   - Access control (IAM)
-   - + Add → Add role assignment
-   - Role: **DNS Zone Contributor**
-   - Members: Select `caddy-dns-challenge`
-   - Review + assign
-
-4. **Get Additional Info:**
-   - Subscription ID: Portal → Subscriptions → Copy ID
-   - Resource Group: DNS Zone → Overview → Resource group name
-
-</details>
-
-### Step 8: Verify Service Principal Works
+### Step 9: Verify Service Principal Works
 
 ```bash
 # Test login as service principal
@@ -207,22 +208,22 @@ az login --service-principal \
 
 # Should succeed
 
-# Test permissions - try to list DNS records
+# Test permissions - try to list DNS records in CHILD zone
 az network dns record-set list \
-  --zone-name $DOMAIN \
-  --resource-group $RG_NAME
+  --zone-name home.$DOMAIN \
+  --resource-group $RG_DNS
 
 # Should list your records (proves read access)
 
 # Test creating TXT record
 az network dns record-set txt create \
-  --zone-name $DOMAIN \
-  --resource-group $RG_NAME \
+  --zone-name home.$DOMAIN \
+  --resource-group $RG_DNS \
   --name "_acme-challenge.test"
 
 az network dns record-set txt add-record \
-  --zone-name $DOMAIN \
-  --resource-group $RG_NAME \
+  --zone-name home.$DOMAIN \
+  --resource-group $RG_DNS \
   --record-set-name "_acme-challenge.test" \
   --value "test-value"
 
@@ -230,8 +231,8 @@ az network dns record-set txt add-record \
 
 # Clean up test record
 az network dns record-set txt delete \
-  --zone-name $DOMAIN \
-  --resource-group $RG_NAME \
+  --zone-name home.$DOMAIN \
+  --resource-group $RG_DNS \
   --name "_acme-challenge.test" \
   --yes
 
@@ -244,16 +245,16 @@ az login
 
 ## Part 3: Azure Blob Storage for Backups
 
-### Step 1: Create Storage Account
+### Step 1: Create Storage Account in Backups Resource Group
 
 ```bash
 # Storage account name (must be globally unique, lowercase, no dashes)
 STORAGE_ACCOUNT="homeserverbackup$(date +%s)"  # Adds timestamp for uniqueness
 
-# Create storage account
+# Create storage account in BACKUPS resource group
 az storage account create \
   --name $STORAGE_ACCOUNT \
-  --resource-group $RG_NAME \
+  --resource-group $RG_BACKUPS \
   --location $LOCATION \
   --sku Standard_LRS \
   --kind StorageV2 \
@@ -283,7 +284,7 @@ az storage container show \
 ```bash
 # Get account name and key
 ACCOUNT_KEY=$(az storage account keys list \
-  --resource-group $RG_NAME \
+  --resource-group $RG_BACKUPS \
   --account-name $STORAGE_ACCOUNT \
   --query '[0].value' \
   --output tsv)
@@ -336,12 +337,12 @@ EOF
 az storage account management-policy create \
   --account-name $STORAGE_ACCOUNT \
   --policy @lifecycle-policy.json \
-  --resource-group $RG_NAME
+  --resource-group $RG_BACKUPS
 
 # Verify
 az storage account management-policy show \
   --account-name $STORAGE_ACCOUNT \
-  --resource-group $RG_NAME
+  --resource-group $RG_BACKUPS
 ```
 
 **Lifecycle policy effect:**
@@ -372,7 +373,7 @@ azure:
   client_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
   client_secret: "your-client-secret-value"
   subscription_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  resource_group: "homeserver-resources"
+  resource_group: "homeserver-dns"  # Use DNS resource group name
 
 restic:
   # Backups (from Part 3)
@@ -386,197 +387,15 @@ Save and exit (automatically encrypts).
 
 ---
 
-## Part 5: Deploy and Test
+## Summary of Resource Groups
 
-### Deploy Configuration
-
-```bash
-# Commit changes
-git add secrets/secrets.yaml
-git commit -m "Add Azure credentials"
-git push
-
-# On server
-cd /etc/nixos
-git pull
-sudo nixos-rebuild switch --flake .#homeserver
-```
-
-### Test DNS-01 Challenge
-
-```bash
-# Wait 2-3 minutes for Caddy to request certificates
-
-# Check certificates obtained
-sudo caddy list-certificates
-
-# Should show certificates for:
-# - jellyfin.home.yourdomain.com
-# - immich.home.yourdomain.com
-# - etc.
-```
-
-### Test Backups
-
-```bash
-# On server
-
-# Run manual backup
-sudo systemctl start restic-backups-homeserver
-
-# Check status
-sudo systemctl status restic-backups-homeserver
-
-# View logs
-journalctl -u restic-backups-homeserver -f
-
-# Verify in Azure
-az storage blob list \
-  --account-name $STORAGE_ACCOUNT \
-  --container-name "restic-backups" \
-  --output table
-```
+| Resource Group | Purpose | Resources |
+|---------------|---------|-----------|
+| `homeserver-dns` | DNS management | • DNS Zone: `yourdomain.com`<br>• Child Zone: `home.yourdomain.com`<br>• Service Principal for Caddy |
+| `homeserver-backups` | Backup storage | • Storage Account<br>• Blob Container: `restic-backups`<br>• Lifecycle policies |
 
 ---
 
-## Cost Estimation
+## Next Steps
 
-### DNS Costs
-
-- **DNS Zone**: $0.50/month
-- **Queries**: First 1 billion free, then $0.40/million
-- **TXT record operations**: ~500/month (negligible)
-
-**Total**: ~$0.50/month
-
-### Backup Storage Costs
-
-Assuming ~200GB backed up:
-
-- **Cool tier**: $0.01/GB/month = $2.00/month
-- **Archive tier** (after 6 months): $0.002/GB/month = $0.40/month
-- **Operations**: < $0.10/month
-
-**Total**: ~$2-3/month initially, less over time
-
-### Total Azure Costs
-
-**~$2.50-3.50/month** for DNS + Backups
-
-Compare to:
-- Dropbox 2TB: $11.99/month
-- Google One 200GB: $2.99/month (but no encryption, no privacy)
-
----
-
-## Monitoring Costs
-
-### View Current Costs
-
-```bash
-# Show costs for resource group
-az consumption usage list \
-  --query "[?contains(instanceName, 'homeserver')]" \
-  --output table
-```
-
-### Set Budget Alert
-
-```bash
-# Create budget alert at $5/month
-az consumption budget create \
-  --budget-name "homeserver-budget" \
-  --resource-group $RG_NAME \
-  --amount 5 \
-  --time-grain Monthly \
-  --time-period start=2025-01-01 \
-  --category Cost
-```
-
----
-
-## Troubleshooting
-
-### DNS Not Resolving
-
-```bash
-# Check zone exists
-az network dns zone show --name $DOMAIN --resource-group $RG_NAME
-
-# Check CNAME record
-az network dns record-set cname show \
-  --zone-name $DOMAIN \
-  --resource-group $RG_NAME \
-  --name "*.home"
-
-# Test from outside
-dig @8.8.8.8 jellyfin.home.$DOMAIN
-```
-
-### Service Principal Authentication Failed
-
-```bash
-# Verify credentials
-az login --service-principal \
-  -u <client_id> \
-  -p <client_secret> \
-  --tenant <tenant_id>
-
-# Check role assignment
-az role assignment list \
-  --assignee <client_id> \
-  --all
-```
-
-### Backup Failing
-
-```bash
-# Check storage account accessible
-az storage account show \
-  --name $STORAGE_ACCOUNT \
-  --resource-group $RG_NAME
-
-# Test upload
-echo "test" | az storage blob upload \
-  --account-name $STORAGE_ACCOUNT \
-  --container-name "restic-backups" \
-  --name "test.txt" \
-  --data "test"
-
-# Delete test
-az storage blob delete \
-  --account-name $STORAGE_ACCOUNT \
-  --container-name "restic-backups" \
-  --name "test.txt"
-```
-
----
-
-## Cleanup (If Needed)
-
-To remove everything:
-
-```bash
-# Delete entire resource group (careful!)
-az group delete --name $RG_NAME --yes --no-wait
-
-# Or delete individual resources
-az storage account delete --name $STORAGE_ACCOUNT --resource-group $RG_NAME --yes
-az network dns zone delete --name $DOMAIN --resource-group $RG_NAME --yes
-az ad sp delete --id <client_id>
-```
-
----
-
-## Summary
-
-You've now configured:
-- ✅ DNS zone with wildcard CNAME
-- ✅ Service principal for automated certificate management
-- ✅ Blob storage for encrypted backups
-- ✅ Lifecycle policies for cost optimization
-- ✅ All credentials added to secrets
-
-**Monthly cost**: ~$2.50-3.50
-
-**Next**: Continue with [SETUP.md](SETUP.md) to deploy your configuration.
+Continue with [SETUP.md](SETUP.md) to deploy your configuration.
