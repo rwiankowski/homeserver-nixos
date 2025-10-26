@@ -29,7 +29,10 @@ in {
     firewall = {
       enable = true;
       allowedTCPPorts = [ 22 ];
-      trustedInterfaces = [ "tailscale0" ];
+      trustedInterfaces = [ 
+        "tailscale0" 
+        "docker0"
+      ];
       checkReversePath = "loose";
     };
   };

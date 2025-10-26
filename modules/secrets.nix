@@ -97,6 +97,14 @@
         owner = "caddy";
         mode = "0400";
       };
+      "mealie/oidc_client_id" = {
+    	owner = "root";
+    	mode = "0400";
+      };
+      "mealie/oidc_client_secret" = {
+    	owner = "root";
+    	mode = "0400";
+      };
     };
   };
 }
