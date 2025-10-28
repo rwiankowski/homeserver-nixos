@@ -1,9 +1,6 @@
 # .gitignore
 # =========
 
-# Hardware configuration (machine-specific, generated per-server)
-hardware-configuration.nix
-
 # Nix build results
 result
 result-*
