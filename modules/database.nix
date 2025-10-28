@@ -7,6 +7,10 @@ in {
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_16;
+
+    extraPlugins = with pkgs.postgresql16Packages; [
+      pgvector
+    ];
     
     # Store database on shared disk
     dataDir = "${vars.storage.shared}/postgresql/16";
@@ -62,7 +66,7 @@ in {
       host all all 127.0.0.1/32 trust
       host all all ::1/128 trust
       # Allow Docker network
-      host all all 172.17.0.0/16 md5
+      host all all 172.17.0.0/16 trust
     '';
   };
 

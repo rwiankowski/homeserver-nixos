@@ -5,7 +5,7 @@ let
 in {
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud32;  # Updated to version 32
+    package = pkgs.nextcloud31;
     hostName = "${vars.services.nextcloud}.${vars.networking.homeDomain}";
     datadir = "${vars.storage.docs}/nextcloud";
     

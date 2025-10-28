@@ -10,12 +10,11 @@ in {
       environment = {
         UPLOAD_LOCATION = "${vars.storage.photos}/immich/upload";
       };
-      ports = [ "2283:3001" ];
       volumes = [
         "${vars.storage.photos}/immich/upload:/usr/src/app/upload"
         "${vars.storage.photos}/immich/library:/usr/src/app/library"
       ];
-      extraOptions = [ "--add-host=host.docker.internal:host-gateway" ];
+      extraOptions = [ "--network=host" ];
     };
     
     immich-machine-learning = {

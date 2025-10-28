@@ -125,10 +125,10 @@
 
       "immich-env" = {
         content = ''
-          DB_HOSTNAME=host.docker.internal
+          DB_HOSTNAME=127.0.0.1
           DB_USERNAME=immich
           DB_DATABASE_NAME=immich
-          REDIS_HOSTNAME=host.docker.internal
+          REDIS_HOSTNAME=127.0.0.1
           DB_PASSWORD=${config.sops.placeholder."database/immich_password"}
         '';
         owner = "root";

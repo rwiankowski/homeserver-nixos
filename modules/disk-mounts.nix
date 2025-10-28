@@ -58,8 +58,8 @@ in {
     
     # Shared disk
     "d ${vars.storage.shared}/backups 0700 root root -"
-    "d ${vars.storage.shared}/postgresql 0755 postgres postgres -" 
-    "d ${vars.storage.shared}/postgresql/16 0755 postgres postgres -"
+    "d ${vars.storage.shared}/postgresql 0700 postgres postgres -" 
+    "d ${vars.storage.shared}/postgresql/16 0700 postgres postgres -"
     "d ${vars.storage.shared}/authentik/media 0755 1000 1000 -"
     "d ${vars.storage.shared}/mealie 0755 root root -"
     "d ${vars.storage.shared}/home-assistant 0755 root root -"
