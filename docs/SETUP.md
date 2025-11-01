@@ -254,6 +254,31 @@ Update these critical values:
     acmeEmail = "you@email.com";      # For Let's Encrypt notifications
   };
 
+  # Service hostnames (subdomain part only)
+  services = {
+    authentik = "authentik";
+    jellyfin = "jellyfin";
+    jellyseerr = "jellyseerr";        # NEW in v2.0
+    immich = "immich";
+    nextcloud = "nextcloud";
+    mealie = "mealie";
+    homeassistant = "hass";
+    llm = "llm";
+    sonarr = "sonarr";
+    radarr = "radarr";
+    readarr = "readarr";              # NEW in v2.0
+    lidarr = "lidarr";                # NEW in v2.0
+    prowlarr = "prowlarr";
+    bazarr = "bazarr";
+    qbittorrent = "qbittorrent";      # NEW in v2.0 (replaces Transmission)
+    paperless = "paperless";
+    audiobookshelf = "audiobooks";
+    homepage = "home";
+    homarr = "homarr";                # NEW in v2.0
+    pgadmin = "pgadmin";
+    grafana = "grafana";
+  };
+
   # Storage paths - should match disk labels from Phase 2
   storage = {
     media = "/mnt/media";
@@ -380,6 +405,7 @@ See detailed guides:
 - [AZURE.md](AZURE.md) - Set up DNS and backups
 - [CROWDSEC.md](CROWDSEC.md) - Configure security
 - [SERVICES.md](SERVICES.md) - Individual service setup
+- [MIGRATION.md](MIGRATION.md) - Upgrading from previous versions
 
 ### 6.1 Connect Tailscale
 
@@ -435,6 +461,50 @@ curl -I https://home.home.yourdomain.com
 open https://home.home.yourdomain.com
 ```
 
+### 6.5 Quick Setup for New Services (v2.0+)
+
+If you're deploying version 2.0.0 or later, configure these new services:
+
+#### qBittorrent - CRITICAL SECURITY STEP
+
+**⚠️ Change default password immediately!**
+
+1. Access `https://qbittorrent.home.yourdomain.com`
+2. Login: `admin` / `adminadmin`
+3. Tools → Options → Web UI → Change password
+4. Create categories:
+   - `tv-sonarr` → `/mnt/media/jellyfin/tv`
+   - `movies-radarr` → `/mnt/media/jellyfin/movies`
+   - `books-readarr` → `/mnt/media/books`
+   - `music-lidarr` → `/mnt/media/jellyfin/music`
+
+#### Update Download Clients in *arr Apps
+
+For each of Sonarr, Radarr, Readarr, Lidarr:
+
+1. Settings → Download Clients → Add → qBittorrent
+2. Host: `localhost`, Port: `8282`
+3. Username: `admin`, Password: (your new password)
+4. Category: (appropriate category from above)
+5. Test and Save
+
+#### Jellyseerr
+
+1. Access `https://jellyseerr.home.yourdomain.com`
+2. Sign in with Jellyfin account
+3. Connect Jellyfin: `http://localhost:8096`
+4. Connect Sonarr: `http://localhost:8989` (with API key)
+5. Connect Radarr: `http://localhost:7878` (with API key)
+
+#### Readarr & Lidarr
+
+1. Access each service
+2. Settings → Media Management → Set root folder
+3. Settings → Download Clients → Add qBittorrent
+4. Connect to Prowlarr (Settings → Apps in Prowlarr)
+
+See [SERVICES.md](SERVICES.md) for detailed configuration of all services.
+
 ---
 
 ## Phase 7: Final Testing
@@ -444,8 +514,16 @@ open https://home.home.yourdomain.com
 Access each service and complete initial setup:
 
 - [ ] **Homepage** (`https://home.home.yourdomain.com`) - Should load
+- [ ] **Homarr** (`https://homarr.home.yourdomain.com`) - Should load
 - [ ] **Authentik** (`https://authentik.home.yourdomain.com`) - Complete setup wizard
 - [ ] **Jellyfin** (`https://jellyfin.home.yourdomain.com`) - Add media libraries
+- [ ] **Jellyseerr** (`https://jellyseerr.home.yourdomain.com`) - Connect to Jellyfin
+- [ ] **qBittorrent** (`https://qbittorrent.home.yourdomain.com`) - Change default password
+- [ ] **Sonarr** (`https://sonarr.home.yourdomain.com`) - Configure download client
+- [ ] **Radarr** (`https://radarr.home.yourdomain.com`) - Configure download client
+- [ ] **Readarr** (`https://readarr.home.yourdomain.com`) - Configure download client
+- [ ] **Lidarr** (`https://lidarr.home.yourdomain.com`) - Configure download client
+- [ ] **Prowlarr** (`https://prowlarr.home.yourdomain.com`) - Add indexers
 - [ ] **Immich** (`https://immich.home.yourdomain.com`) - Create account
 - [ ] **NextCloud** (`https://nextcloud.home.yourdomain.com`) - Login
 - [ ] **Paperless** (`https://paperless.home.yourdomain.com`) - Login
@@ -509,11 +587,15 @@ journalctl -p err -b
 
 ### Immediate Tasks
 
-1. **Configure SSO** - Set up Authentik for all services
-2. **Import media** - Add your movies/TV to Jellyfin
-3. **Upload photos** - Start using Immich
-4. **Set up Home Assistant** - Add your smart home devices
-5. **Pull LLM models** - `ollama pull llama3.1:8b`
+1. **⚠️ Change qBittorrent password** - Default is admin/adminadmin (SECURITY RISK!)
+2. **Configure download clients** - Connect Sonarr/Radarr/Readarr/Lidarr to qBittorrent
+3. **Set up Jellyseerr** - Connect to Jellyfin and arr services
+4. **Configure SSO** - Set up Authentik for all services
+5. **Import media** - Add your movies/TV to Jellyfin
+6. **Upload photos** - Start using Immich
+7. **Set up Home Assistant** - Add your smart home devices
+8. **Pull LLM models** - `ollama pull llama3.1:8b`
+9. **Customise dashboards** - Configure Homepage and Homarr to your liking
 
 ### Optional Enhancements
 

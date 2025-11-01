@@ -37,6 +37,7 @@
   services = {
     authentik = "authentik";
     jellyfin = "jellyfin";
+    jellyseerr = "jellyseerr";
     immich = "immich";
     nextcloud = "nextcloud";
     mealie = "mealie";
@@ -44,11 +45,15 @@
     llm = "llm";
     sonarr = "sonarr";
     radarr = "radarr";
+    readarr = "readarr";
+    lidarr = "lidarr";
     prowlarr = "prowlarr";
     bazarr = "bazarr";
+    qbittorrent = "qbittorrent";
     paperless = "paperless";
     audiobookshelf = "audiobooks";
     homepage = "home";
+    homarr = "homarr";
     pgadmin = "pgadmin";
     grafana = "grafana";
   };

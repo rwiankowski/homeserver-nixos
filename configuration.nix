@@ -12,6 +12,7 @@ in {
     ./modules/database.nix
     ./modules/authentik.nix
     ./modules/jellyfin.nix
+    ./modules/jellyseerr.nix
     ./modules/arr-stack.nix
     ./modules/immich.nix
     ./modules/nextcloud.nix
@@ -21,6 +22,7 @@ in {
     ./modules/paperless.nix
     ./modules/audiobookshelf.nix
     ./modules/homepage.nix
+    ./modules/homarr.nix
     ./modules/backups.nix
     ./modules/secrets.nix
   ];

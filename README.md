@@ -1,6 +1,6 @@
 # 🏠 NixOS Home Server
 
-A complete, production-ready NixOS configuration for self-hosting 15+ services with enterprise-grade security, automated backups, and zero-trust networking.
+A complete, production-ready NixOS configuration for self-hosting 20+ services with enterprise-grade security, automated backups, and zero-trust networking.
 
 > **Perfect for**: Home lab enthusiasts, privacy-conscious users, and anyone wanting to self-host their digital life with minimal maintenance.
 
@@ -10,7 +10,11 @@ A complete, production-ready NixOS configuration for self-hosting 15+ services w
 
 ### 🎬 Media & Entertainment
 - **Jellyfin** - Stream your movies, TV shows, and music
-- **Sonarr/Radarr/Prowlarr/Bazarr** - Automated media management
+- **Jellyseerr** - Media request management for Jellyfin
+- **Sonarr/Radarr** - Automated TV show and movie management
+- **Readarr/Lidarr** - Ebook and music library management
+- **Prowlarr/Bazarr** - Indexer management and subtitles
+- **qBittorrent** - Torrent download client with modern web UI
 - **Audiobookshelf** - Audiobook and podcast server
 
 ### 📸 Photos & Documents
@@ -22,6 +26,7 @@ A complete, production-ready NixOS configuration for self-hosting 15+ services w
 - **Home Assistant** - Home automation platform
 - **Mealie** - Recipe manager and meal planner
 - **Homepage** - Beautiful dashboard for all services
+- **Homarr** - Modern dashboard with service monitoring
 
 ### 🤖 AI & LLM
 - **Open WebUI** - ChatGPT-like interface
@@ -74,8 +79,12 @@ A complete, production-ready NixOS configuration for self-hosting 15+ services w
 ┌───────▼────────┐    ┌────────▼────────┐    ┌───────▼────────┐
 │  Media Services│    │ Document Services│    │  Smart Home    │
 │  • Jellyfin    │    │ • NextCloud      │    │ • Home Assist. │
-│  • Sonarr      │    │ • Paperless      │    │ • Mealie       │
-│  • Radarr      │    │ • Immich         │    │ • Open WebUI   │
+│  • Jellyseerr  │    │ • Paperless      │    │ • Mealie       │
+│  • Sonarr      │    │ • Immich         │    │ • Open WebUI   │
+│  • Radarr      │    │                  │    │ • Homarr       │
+│  • Readarr     │    │                  │    │ • Homepage     │
+│  • Lidarr      │    │                  │    │                │
+│  • qBittorrent │    │                  │    │                │
 │  • Audiobooks  │    │                  │    │                │
 └────────────────┘    └──────────────────┘    └────────────────┘
         │                       │                       │
@@ -133,12 +142,18 @@ sudo nixos-rebuild switch --flake .#homeserver
 
 ## 📚 Documentation
 
+### Getting Started
 - **[Complete Setup Guide](docs/SETUP.md)** - Step-by-step deployment instructions
 - **[Azure Setup](docs/AZURE.md)** - Configure DNS, storage, and service principal
 - **[Tailscale Guide](docs/TAILSCALE.md)** - VPN configuration
-- **[CrowdSec Guide](docs/CROWDSEC.md)** - Security monitoring
 - **[Secrets Management](docs/SOPS.md)** - Using sops-nix for secrets
+
+### Service Configuration
+- **[Arr Stack Setup](docs/ARR_STACK_SETUP.md)** - Complete media automation workflow setup
 - **[Service Configuration](docs/SERVICES.md)** - Individual service setup
+- **[CrowdSec Guide](docs/CROWDSEC.md)** - Security monitoring
+
+### Maintenance
 - **[Backup Guide](docs/BACKUP.md)** - Backup and restore procedures
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 

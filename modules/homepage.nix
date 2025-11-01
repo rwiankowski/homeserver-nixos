@@ -30,6 +30,10 @@ in {
         icon: jellyfin.png
         href: ${mkServiceUrl vars.services.jellyfin}
         description: Media server
+    - Jellyseerr:
+        icon: jellyseerr.png
+        href: ${mkServiceUrl vars.services.jellyseerr}
+        description: Media requests
     - Sonarr:
         icon: sonarr.png
         href: ${mkServiceUrl vars.services.sonarr}
@@ -46,10 +50,24 @@ in {
         icon: bazarr.png
         href: ${mkServiceUrl vars.services.bazarr}
         description: Subtitles
+    - qBittorrent:
+        icon: qbittorrent.png
+        href: ${mkServiceUrl vars.services.qbittorrent}
+        description: Download client
+
+- Books & Music:
     - Audiobookshelf:
         icon: audiobookshelf.png
         href: ${mkServiceUrl vars.services.audiobookshelf}
         description: Audiobooks & Podcasts
+    - Readarr:
+        icon: readarr.png
+        href: ${mkServiceUrl vars.services.readarr}
+        description: Ebooks & Audiobooks
+    - Lidarr:
+        icon: lidarr.png
+        href: ${mkServiceUrl vars.services.lidarr}
+        description: Music library
 
 - Productivity:
     - NextCloud:
@@ -84,6 +102,10 @@ in {
         description: AI chat with web search
 
 - System:
+    - Homarr:
+        icon: homarr.png
+        href: ${mkServiceUrl vars.services.homarr}
+        description: Dashboard
     - Authentik:
         icon: authentik.png
         href: ${mkServiceUrl vars.services.authentik}
@@ -110,6 +132,9 @@ headerStyle: boxed
 layout:
   Media:
     style: row
+    columns: 4
+  Books & Music:
+    style: row
     columns: 3
   Productivity:
     style: row
@@ -125,7 +150,7 @@ layout:
     columns: 2
   System:
     style: row
-    columns: 2
+    columns: 3
 EOF
     fi
 

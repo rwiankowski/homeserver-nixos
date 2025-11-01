@@ -47,6 +47,11 @@
     radarr = "radarr";
     prowlarr = "prowlarr";
     bazarr = "bazarr";
+    readarr = "books";
+    lidarr = "music";
+    qbittorrent = "downloads";
+    jellyseerr = "discover";
+    homarr = "watch";
     paperless = "scans";
     audiobookshelf = "audiobooks";
     homepage = "dash";

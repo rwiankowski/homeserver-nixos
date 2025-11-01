@@ -419,6 +419,194 @@ free -h
 # Use smaller model or add more RAM
 ```
 
+### qBittorrent
+
+**Can't login**:
+
+```bash
+# Check service is running
+systemctl status qbittorrent
+
+# Check logs
+journalctl -u qbittorrent -n 50
+
+# Default credentials: admin / adminadmin
+# If changed and forgotten, reset config:
+sudo systemctl stop qbittorrent
+sudo rm /mnt/shared/qbittorrent/config/qBittorrent.conf
+sudo systemctl start qbittorrent
+```
+
+**Downloads not starting**:
+
+```bash
+# Check permissions
+ls -la /mnt/media/downloads
+sudo chown -R media:media /mnt/media/downloads
+
+# Check disk space
+df -h /mnt/media
+
+# Check logs
+journalctl -u qbittorrent -f
+```
+
+***arr apps can't connect**:
+
+```bash
+# Verify qBittorrent is running
+systemctl status qbittorrent
+
+# Test connection
+curl http://localhost:8282
+
+# Check credentials in *arr app
+# Use localhost:8282, not domain name
+```
+
+### Jellyseerr
+
+**Can't connect to Jellyfin**:
+
+```bash
+# Check Jellyfin is running
+systemctl status jellyfin
+
+# Use internal URL: http://localhost:8096
+# NOT https://jellyfin.home.yourdomain.com
+
+# Check logs
+docker logs jellyseerr
+```
+
+**Can't connect to Sonarr/Radarr**:
+
+```bash
+# Verify services are running
+systemctl status sonarr
+systemctl status radarr
+
+# Use internal URLs: http://localhost:PORT
+# Get API keys from each service Settings → General
+
+# Check logs
+docker logs jellyseerr --tail 100
+```
+
+**Requests not working**:
+
+```bash
+# Check download client configured in Sonarr/Radarr
+# Check indexers available in Prowlarr
+# Check quality profiles exist
+# Check root folders are correct
+
+# View logs
+docker logs jellyseerr -f
+```
+
+### Readarr
+
+**Can't find books**:
+
+```bash
+# Check indexers
+# Readarr needs indexers with book content
+# Configure in Prowlarr, sync to Readarr
+
+# Check logs
+journalctl -u readarr -n 50
+
+# Verify download client
+# Settings → Download Clients → Test
+```
+
+**Books not importing**:
+
+```bash
+# Check permissions
+ls -la /mnt/media/books
+sudo chown -R media:media /mnt/media/books
+
+# Check naming format
+# Settings → Media Management → File Management
+
+# Check logs
+journalctl -u readarr -f
+```
+
+### Lidarr
+
+**Can't find music**:
+
+```bash
+# Check indexers in Prowlarr
+# Music indexers needed
+
+# Check logs
+journalctl -u lidarr -n 50
+
+# Verify download client configured
+```
+
+**Music not importing**:
+
+```bash
+# Check permissions
+ls -la /mnt/media/jellyfin/music
+sudo chown -R media:media /mnt/media/jellyfin/music
+
+# Check metadata source
+# Settings → Metadata → Select provider
+
+# Check logs
+journalctl -u lidarr -f
+```
+
+### Homarr
+
+**Container won't start**:
+
+```bash
+# Check Docker
+systemctl status docker
+
+# Check logs
+docker logs homarr
+
+# Check permissions
+ls -la /mnt/shared/homarr
+sudo chown -R root:root /mnt/shared/homarr
+
+# Restart
+docker restart homarr
+```
+
+**Can't access Docker socket**:
+
+```bash
+# Check socket mounted
+docker inspect homarr | grep docker.sock
+
+# Should show: /var/run/docker.sock:/var/run/docker.sock:ro
+
+# Check socket permissions
+ls -la /var/run/docker.sock
+```
+
+**Service integrations not working**:
+
+```bash
+# Use internal URLs: http://localhost:PORT
+# NOT https://service.home.yourdomain.com
+
+# Get API keys from each service
+# Test connection in Homarr settings
+
+# Check logs
+docker logs homarr -f
+```
+
 ---
 
 ## Storage Issues

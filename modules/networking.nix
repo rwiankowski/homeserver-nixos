@@ -138,6 +138,36 @@ in {
           import crowdsec_logs
         '';
       };
+      "${mkServiceUrl vars.services.readarr}" = {
+        extraConfig = ''
+          reverse_proxy localhost:8787
+          import crowdsec_logs
+        '';
+      };
+      "${mkServiceUrl vars.services.lidarr}" = {
+        extraConfig = ''
+          reverse_proxy localhost:8686
+          import crowdsec_logs
+        '';
+      };
+      "${mkServiceUrl vars.services.qbittorrent}" = {
+        extraConfig = ''
+          reverse_proxy localhost:8282
+          import crowdsec_logs
+        '';
+      };
+      "${mkServiceUrl vars.services.jellyseerr}" = {
+        extraConfig = ''
+          reverse_proxy localhost:5055
+          import crowdsec_logs
+        '';
+      };
+      "${mkServiceUrl vars.services.homarr}" = {
+        extraConfig = ''
+          reverse_proxy localhost:7575
+          import crowdsec_logs
+        '';
+      };
       "${mkServiceUrl vars.services.paperless}" = {
         extraConfig = ''
           reverse_proxy localhost:28981

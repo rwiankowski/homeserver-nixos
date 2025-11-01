@@ -12,7 +12,7 @@ Your NixOS home server configuration includes:
 - `vars.nix` - User-customizable variables
 - `hardware-configuration.nix` - Generated per-machine (not in git)
 
-### Service Modules (17 files in `modules/`)
+### Service Modules (20 files in `modules/`)
 - `disk-mounts.nix` - Multi-disk storage
 - `networking.nix` - Caddy, Tailscale, DNS
 - `security.nix` - SSH, Fail2ban, AppArmor
@@ -21,7 +21,8 @@ Your NixOS home server configuration includes:
 - `crowdsec.nix` - Security monitoring
 - `authentik.nix` - SSO provider
 - `jellyfin.nix` - Media server
-- `arr-stack.nix` - Sonarr, Radarr, etc.
+- `jellyseerr.nix` - Media request management
+- `arr-stack.nix` - Sonarr, Radarr, Readarr, Lidarr, Prowlarr, Bazarr, qBittorrent
 - `immich.nix` - Photo management
 - `nextcloud.nix` - File sync
 - `paperless.nix` - Document management
@@ -30,18 +31,20 @@ Your NixOS home server configuration includes:
 - `home-assistant.nix` - Smart home
 - `llm-assistant.nix` - AI chatbot
 - `homepage.nix` - Dashboard
+- `homarr.nix` - Modern dashboard
 - `backups.nix` - Restic to Azure
 
-### Documentation (9 files in `docs/`)
+### Documentation (10 files in `docs/`)
 - `SETUP.md` - Complete deployment guide
 - `AZURE.md` - Azure DNS + Storage setup
 - `TAILSCALE.md` - VPN configuration
 - `CROWDSEC.md` - Security setup
 - `SOPS.md` - Secrets management
 - `SERVICES.md` - Service configuration
+- `MIGRATION.md` - Upgrading from previous versions
 - `BACKUP.md` - Backup management
 - `TROUBLESHOOTING.md` - Common issues
-- `ARCHITECTURE.md` - System overview
+- `DEPLOYMENT.md` - Repository and deployment info
 
 ### Supporting Files
 - `README.md` - Project overview
@@ -148,7 +151,7 @@ nix flake check
    - `crowdsec`
 
 3. **Add description**:
-   > "Complete NixOS configuration for self-hosting 15+ services with enterprise security, automated backups, and zero-trust networking"
+   > "Complete NixOS configuration for self-hosting 20+ services with enterprise security, automated backups, and zero-trust networking"
 
 ### Share It
 
@@ -164,7 +167,8 @@ Example post:
 🏠 I built a complete NixOS home server config
 
 Features:
-• 15+ self-hosted services (Jellyfin, Immich, NextCloud, etc.)
+• 20+ self-hosted services (Jellyfin, Jellyseerr, Immich, NextCloud, etc.)
+• Complete media automation stack (Sonarr, Radarr, Readarr, Lidarr, qBittorrent)
 • Zero-trust networking with Tailscale
 • Let's Encrypt certificates with custom domain
 • Automated backups to Azure
@@ -244,7 +248,7 @@ Add to README.md:
 ```markdown
 ![NixOS](https://img.shields.io/badge/NixOS-24.11-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Services](https://img.shields.io/badge/services-15+-orange)
+![Services](https://img.shields.io/badge/services-20+-orange)
 ```
 
 ## 🎓 Learning Resources to Link
