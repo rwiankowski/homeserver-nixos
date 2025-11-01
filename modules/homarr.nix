@@ -19,11 +19,4 @@ in {
       "/var/run/docker.sock:/var/run/docker.sock:ro"
     ];
   };
-
-  systemd.tmpfiles.rules = [
-    "d ${vars.storage.shared}/homarr 0755 root root -"
-    "d ${vars.storage.shared}/homarr/configs 0755 root root -"
-    "d ${vars.storage.shared}/homarr/icons 0755 root root -"
-    "d ${vars.storage.shared}/homarr/data 0755 root root -"
-  ];
 }

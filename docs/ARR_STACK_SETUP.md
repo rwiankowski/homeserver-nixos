@@ -60,6 +60,7 @@ By following this guide, you'll set up a complete media automation workflow wher
 - Services are already installed and running via NixOS
 - You're starting with fresh, unconfigured services
 - You have access to the web interfaces
+- All required directories are automatically created (managed by `modules/disk-mounts.nix`)
 
 ---
 
@@ -130,6 +131,8 @@ By following this guide, you'll set up a complete media automation workflow wher
 | **Readarr** | Manages ebooks and audiobooks | 8787 | 🟢 Optional |
 | **Lidarr** | Manages music library | 8686 | 🟢 Optional |
 | **Homarr** | Dashboard for monitoring services | 7575 | 🟢 Optional |
+
+**Storage Management:** All required directories for these services are automatically created during system boot via `modules/disk-mounts.nix` with appropriate permissions.
 
 ### Data Flow Example
 
@@ -1224,6 +1227,8 @@ Your NixOS configuration already backs up `/mnt/shared` to Azure via Restic.
 4. Ensure media user has write access
 5. Check paths match exactly (case-sensitive)
 
+**Note:** All required directories are automatically created by `modules/disk-mounts.nix` during system boot. If directories are missing, check the service logs.
+
 #### Jellyfin Not Detecting New Media
 
 **Symptom:** New downloads don't appear in Jellyfin
@@ -1281,6 +1286,8 @@ sudo chown -R media:media /mnt/media/books
 sudo chmod -R 755 /mnt/media/jellyfin
 sudo chmod -R 755 /mnt/media/downloads
 ```
+
+**Note:** Directory permissions are managed centrally in `modules/disk-mounts.nix`. For permanent changes, edit that file and run `nixos-rebuild switch`.
 
 ### Download Client Problems
 

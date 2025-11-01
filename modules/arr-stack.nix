@@ -22,6 +22,7 @@ in {
   services.prowlarr = {
     enable = true;
     openFirewall = false;
+    dataDir = "${vars.storage.shared}/prowlarr";
   };
 
   services.bazarr = {
@@ -29,6 +30,7 @@ in {
     openFirewall = false;
     user = "media";
     group = "media";
+    dataDir = "${vars.storage.shared}/bazarr";
   };
 
   services.readarr = {
@@ -52,19 +54,25 @@ in {
     openFirewall = false;
     user = "media";
     group = "media";
-    dataDir = "${vars.storage.shared}/qbittorrent";
-    port = 8282;
+    profileDir = "${vars.storage.shared}/qbittorrent";
     webuiPort = 8282;
+    
+    serverConfig = {
+      LegalNotice.Accepted = true;
+      Preferences = {
+        Downloads = {
+          SavePath = "${vars.storage.media}/downloads";
+          TempPath = "${vars.storage.media}/downloads/.incomplete";
+          TempPathEnabled = true;
+        };
+        WebUI = {
+          # Allow access from reverse proxy
+          CSRFProtection = false;
+          HostHeaderValidation = false;
+        };
+      };
+    };
   };
 
-  systemd.services.qbittorrent.preStart = ''
-    mkdir -p ${vars.storage.media}/downloads
-    chown media:media ${vars.storage.media}/downloads
-  '';
-
-  systemd.tmpfiles.rules = [
-    "d ${vars.storage.media}/downloads 0755 media media -"
-    "d ${vars.storage.media}/downloads/.incomplete 0755 media media -"
-  ];
 }
 

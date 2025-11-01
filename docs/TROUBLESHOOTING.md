@@ -280,6 +280,8 @@ sudo chown -R 1000:1000 /mnt/shared/containername
 docker restart containername
 ```
 
+**Note:** Directory permissions are defined in `modules/disk-mounts.nix`. If you need to change ownership or permissions permanently, edit that file and rebuild.
+
 ---
 
 ## Service-Specific Issues

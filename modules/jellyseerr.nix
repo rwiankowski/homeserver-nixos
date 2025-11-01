@@ -16,8 +16,4 @@ in {
       "${vars.storage.shared}/jellyseerr:/app/config"
     ];
   };
-
-  systemd.tmpfiles.rules = [
-    "d ${vars.storage.shared}/jellyseerr 0755 root root -"
-  ];
 }
