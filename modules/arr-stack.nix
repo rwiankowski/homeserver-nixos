@@ -22,6 +22,8 @@ in {
   services.prowlarr = {
     enable = true;
     openFirewall = false;
+    # Note: Prowlarr in NixOS 25.05 does not support custom dataDir
+    # Data will be stored in /var/lib/prowlarr (managed by StateDirectory)
   };
 
   services.bazarr = {
@@ -29,6 +31,8 @@ in {
     openFirewall = false;
     user = "media";
     group = "media";
+    # Note: Bazarr in NixOS 25.05 does not support custom dataDir
+    # Data will be stored in /var/lib/bazarr (managed by StateDirectory)
   };
 
   services.readarr = {
@@ -52,19 +56,25 @@ in {
     openFirewall = false;
     user = "media";
     group = "media";
-    dataDir = "${vars.storage.shared}/qbittorrent";
-    port = 8282;
+    profileDir = "${vars.storage.shared}/qbittorrent";
     webuiPort = 8282;
+    
+    serverConfig = {
+      LegalNotice.Accepted = true;
+      Preferences = {
+        Downloads = {
+          SavePath = "${vars.storage.media}/downloads";
+          TempPath = "${vars.storage.media}/downloads/.incomplete";
+          TempPathEnabled = true;
+        };
+        WebUI = {
+          # Allow access from reverse proxy
+          CSRFProtection = false;
+          HostHeaderValidation = false;
+        };
+      };
+    };
   };
 
-  systemd.services.qbittorrent.preStart = ''
-    mkdir -p ${vars.storage.media}/downloads
-    chown media:media ${vars.storage.media}/downloads
-  '';
-
-  systemd.tmpfiles.rules = [
-    "d ${vars.storage.media}/downloads 0755 media media -"
-    "d ${vars.storage.media}/downloads/.incomplete 0755 media media -"
-  ];
 }
 

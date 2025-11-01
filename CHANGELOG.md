@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Homarr**: Upgraded to v1+ from homarr-labs organization
+  - Updated Docker image from `ghcr.io/ajnart/homarr:latest` to `ghcr.io/homarr-labs/homarr:1`
+  - Now using semantic versioning tag `:1` for v1.x releases (currently v1.43.1)
+  - Project moved to homarr-labs GitHub organization
+  - Existing data and configuration remain compatible
+  - Volume mounts and environment variables unchanged
+- **Directory Management**: Centralized all disk-related directory creation in `disk-mounts.nix`
+  - Moved arr stack directory creation from individual service modules to centralized location
+  - Removed duplicate `systemd.tmpfiles.rules` from arr-stack.nix, jellyseerr.nix, and homarr.nix
+  - Added `/mnt/media/books` directory for Readarr ebook storage
+  - Improved organization with clear section comments (System services vs Arr Stack)
+  - All directory permissions now managed in a single, maintainable location
+  - Removed directory creation for Bazarr and Prowlarr (use default /var/lib paths)
+
+### Fixed
+- **qBittorrent**: Corrected NixOS module configuration to use valid options
+  - Replaced invalid `dataDir` option with `profileDir` for config storage
+  - Replaced invalid `port` option with proper `webuiPort` configuration
+  - Added `serverConfig` to properly configure download paths and WebUI settings
+  - Downloads now correctly saved to `/mnt/media/downloads` as intended
+  - Profile/config data stored on `/mnt/shared/qbittorrent` for backups
+- **Bazarr & Prowlarr**: Removed invalid `dataDir` configuration options
+  - Bazarr in NixOS 25.05 does not support custom `dataDir` (uses StateDirectory)
+  - Prowlarr in NixOS 25.05 does not support custom `dataDir` (uses StateDirectory)
+  - Both services now use default paths: `/var/lib/bazarr` and `/var/lib/prowlarr`
+  - Sonarr, Radarr, Readarr, and Lidarr continue to support custom `dataDir` on `/mnt/shared`
+
 ## [2.0.0] - 2025-11-01
 
 ### Added

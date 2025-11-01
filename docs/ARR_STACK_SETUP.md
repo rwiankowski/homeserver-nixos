@@ -60,6 +60,7 @@ By following this guide, you'll set up a complete media automation workflow wher
 - Services are already installed and running via NixOS
 - You're starting with fresh, unconfigured services
 - You have access to the web interfaces
+- All required directories are automatically created (managed by `modules/disk-mounts.nix`)
 
 ---
 
@@ -118,18 +119,23 @@ By following this guide, you'll set up a complete media automation workflow wher
 
 ### Service Responsibilities
 
-| Service | Purpose | Port | Priority |
-|---------|---------|------|----------|
-| **qBittorrent** | Downloads torrent files | 8282 | 🔴 Critical |
-| **Prowlarr** | Manages indexers, searches for content | 9696 | 🔴 Critical |
-| **Sonarr** | Manages TV shows, triggers downloads | 8989 | 🔴 Critical |
-| **Radarr** | Manages movies, triggers downloads | 7878 | 🔴 Critical |
-| **Jellyfin** | Streams media to your devices | 8096 | 🔴 Critical |
-| **Jellyseerr** | User-friendly request interface | 5055 | 🟡 Important |
-| **Bazarr** | Downloads subtitles automatically | 6767 | 🟢 Optional |
-| **Readarr** | Manages ebooks and audiobooks | 8787 | 🟢 Optional |
-| **Lidarr** | Manages music library | 8686 | 🟢 Optional |
-| **Homarr** | Dashboard for monitoring services | 7575 | 🟢 Optional |
+| Service | Purpose | Port | Data Location | Priority |
+|---------|---------|------|---------------|----------|
+| **qBittorrent** | Downloads torrent files | 8282 | `/mnt/shared/qbittorrent` | 🔴 Critical |
+| **Prowlarr** | Manages indexers, searches for content | 9696 | `/var/lib/prowlarr` | 🔴 Critical |
+| **Sonarr** | Manages TV shows, triggers downloads | 8989 | `/mnt/shared/sonarr` | 🔴 Critical |
+| **Radarr** | Manages movies, triggers downloads | 7878 | `/mnt/shared/radarr` | 🔴 Critical |
+| **Jellyfin** | Streams media to your devices | 8096 | `/var/lib/jellyfin` | 🔴 Critical |
+| **Jellyseerr** | User-friendly request interface | 5055 | `/mnt/shared/jellyseerr` | 🟡 Important |
+| **Bazarr** | Downloads subtitles automatically | 6767 | `/var/lib/bazarr` | 🟢 Optional |
+| **Readarr** | Manages ebooks and audiobooks | 8787 | `/mnt/shared/readarr` | 🟢 Optional |
+| **Lidarr** | Manages music library | 8686 | `/mnt/shared/lidarr` | 🟢 Optional |
+| **Homarr** | Dashboard for monitoring services | 7575 | `/mnt/shared/homarr` | 🟢 Optional |
+
+**Storage Management:** 
+- Most service configuration directories are automatically created on `/mnt/shared` during system boot via `modules/disk-mounts.nix`
+- **Note:** Bazarr and Prowlarr use default NixOS paths (`/var/lib/*`) as they don't support custom data directories in NixOS 25.05
+- Media files are stored on `/mnt/media` (separate from configuration data)
 
 ### Data Flow Example
 
@@ -275,6 +281,8 @@ For better performance, adjust these settings:
 **URL:** `https://prowlarr.home.yourdomain.com`
 
 Prowlarr manages indexers (sites that list torrents) and connects them to all your *arr apps.
+
+**Note:** Prowlarr configuration is stored in `/var/lib/prowlarr` (NixOS default location). This is managed automatically by the system.
 
 #### Initial Configuration
 
@@ -666,6 +674,8 @@ Lidarr manages your music library.
 
 Bazarr automatically downloads subtitles for your media.
 
+**Note:** Bazarr configuration is stored in `/var/lib/bazarr` (NixOS default location). This is managed automatically by the system.
+
 #### Initial Configuration
 
 1. Open Bazarr web interface
@@ -957,10 +967,12 @@ Let's make sure everything works end-to-end!
 
 Homarr provides a beautiful dashboard to monitor all your services.
 
+**Note:** This server uses Homarr v1+ from the homarr-labs organization, which includes many improvements over the legacy version including better authentication, more integrations, and enhanced customization options.
+
 #### Initial Setup
 
 1. Open Homarr web interface
-2. You'll see a default dashboard
+2. You'll see a default dashboard or setup wizard
 
 #### Customise Dashboard
 
@@ -1224,6 +1236,8 @@ Your NixOS configuration already backs up `/mnt/shared` to Azure via Restic.
 4. Ensure media user has write access
 5. Check paths match exactly (case-sensitive)
 
+**Note:** All required directories are automatically created by `modules/disk-mounts.nix` during system boot. If directories are missing, check the service logs.
+
 #### Jellyfin Not Detecting New Media
 
 **Symptom:** New downloads don't appear in Jellyfin
@@ -1281,6 +1295,8 @@ sudo chown -R media:media /mnt/media/books
 sudo chmod -R 755 /mnt/media/jellyfin
 sudo chmod -R 755 /mnt/media/downloads
 ```
+
+**Note:** Directory permissions are managed centrally in `modules/disk-mounts.nix`. For permanent changes, edit that file and run `nixos-rebuild switch`.
 
 ### Download Client Problems
 

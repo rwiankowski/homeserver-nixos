@@ -6,7 +6,9 @@ in {
   virtualisation.docker.enable = true;
 
   virtualisation.oci-containers.containers.homarr = {
-    image = "ghcr.io/ajnart/homarr:latest";
+    # Homarr v1+ from homarr-labs organization
+    # https://github.com/homarr-labs/homarr
+    image = "ghcr.io/homarr-labs/homarr:1";
     environment = {
       TZ = vars.system.timezone;
       BASE_URL = "https://${vars.services.homarr}.${vars.networking.homeDomain}";
@@ -19,11 +21,4 @@ in {
       "/var/run/docker.sock:/var/run/docker.sock:ro"
     ];
   };
-
-  systemd.tmpfiles.rules = [
-    "d ${vars.storage.shared}/homarr 0755 root root -"
-    "d ${vars.storage.shared}/homarr/configs 0755 root root -"
-    "d ${vars.storage.shared}/homarr/icons 0755 root root -"
-    "d ${vars.storage.shared}/homarr/data 0755 root root -"
-  ];
 }

@@ -39,6 +39,7 @@ in {
     "d ${vars.storage.media}/jellyfin/music 0775 media media -"
     "d ${vars.storage.media}/audiobooks 0775 1000 1000 -"
     "d ${vars.storage.media}/podcasts 0775 1000 1000 -"
+    "d ${vars.storage.media}/books 0775 media media -"
     "d ${vars.storage.media}/downloads 0775 media media -"
     "d ${vars.storage.media}/downloads/.incomplete 0775 media media -"     
     
@@ -56,7 +57,7 @@ in {
     "d ${vars.storage.docs}/paperless/media 0755 paperless paperless -"
     "d ${vars.storage.docs}/paperless/export 0755 paperless paperless -"
     
-    # Shared disk
+    # Shared disk - System services
     "d ${vars.storage.shared}/backups 0700 root root -"
     "d ${vars.storage.shared}/postgresql 0700 postgres postgres -" 
     "d ${vars.storage.shared}/postgresql/16 0700 postgres postgres -"
@@ -66,5 +67,17 @@ in {
     "d ${vars.storage.shared}/open-webui 0755 root root -"
     "d ${vars.storage.shared}/homepage 0755 root root -"
     "d ${vars.storage.shared}/audiobookshelf 0755 1000 1000 -"
+    
+    # Shared disk - Arr Stack (media automation)
+    "d ${vars.storage.shared}/qbittorrent 0755 media media -"
+    "d ${vars.storage.shared}/sonarr 0755 media media -"
+    "d ${vars.storage.shared}/radarr 0755 media media -"
+    "d ${vars.storage.shared}/readarr 0755 media media -"
+    "d ${vars.storage.shared}/lidarr 0755 media media -"
+    "d ${vars.storage.shared}/jellyseerr 0755 root root -"
+    "d ${vars.storage.shared}/homarr 0755 root root -"
+    "d ${vars.storage.shared}/homarr/configs 0755 root root -"
+    "d ${vars.storage.shared}/homarr/icons 0755 root root -"
+    "d ${vars.storage.shared}/homarr/data 0755 root root -"
   ];
 }
