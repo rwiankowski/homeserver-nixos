@@ -112,10 +112,10 @@
       "authentik-env" = {
         content = ''
           AUTHENTIK_ERROR_REPORTING__ENABLED=false
-          AUTHENTIK_POSTGRESQL__HOST=127.0.0.1
+          AUTHENTIK_POSTGRESQL__HOST=host.docker.internal
           AUTHENTIK_POSTGRESQL__NAME=authentik
           AUTHENTIK_POSTGRESQL__USER=authentik
-          AUTHENTIK_REDIS__HOST=127.0.0.1
+          AUTHENTIK_REDIS__HOST=host.docker.internal
           AUTHENTIK_SECRET_KEY=${config.sops.placeholder."authentik/secret_key"}
           AUTHENTIK_POSTGRESQL__PASSWORD=${config.sops.placeholder."database/authentik_password"}
         '';

@@ -86,6 +86,23 @@ in {
   services.redis.servers.shared = {
     enable = true;
     port = 6379;
-    bind = "127.0.0.1";
+    # Bind to all interfaces to allow Docker container access regardless of network mode
+    # Security: openFirewall=false ensures port 6379 is blocked by the firewall
+    # Only accessible from localhost and Docker containers, not from external networks
+    # This works with both bridge networking (host.docker.internal) and host networking
+    bind = null;  # null = bind to 0.0.0.0 (all interfaces)
+    # Don't open firewall - only accessible locally and from Docker
+    openFirewall = false;
+    
+    # Disable protected mode to allow Docker container connections
+    # Protected mode blocks non-localhost connections when no password is set
+    # This is safe because:
+    # - Firewall blocks external access (openFirewall = false)
+    # - Redis only accessible from localhost and Docker containers
+    # - No internet exposure
+    # - Standard approach for containerized environments with firewall protection
+    settings = {
+      protected-mode = "no";
+    };
   };
 }

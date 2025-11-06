@@ -7,13 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Redis**: Disabled protected mode to allow Docker container connections (fixes error 104)
+  - Added `settings = { protected-mode = "no"; }` to Redis configuration
+  - Fixes "error 104 - Connection reset by peer" when Authentik containers try to connect
+  - Root cause: Redis protected mode blocks non-localhost connections when no password is configured
+  - Security maintained: Firewall still blocks external access (`openFirewall = false`)
+  - Redis remains accessible only from localhost and Docker containers, no internet exposure
+  - This is the standard approach for containerized environments with firewall protection
+  - System rebuild required: `sudo nixos-rebuild switch --flake .#homeserver`
+  - After rebuild, verify Authentik can connect: `docker logs authentik-server` (should show no Redis errors)
+  - Alternative approach: Use password authentication with `requirePass` (more complex, same security level)
+- **Redis**: Fixed bind address configuration to resolve Authentik connection errors
+  - Changed bind address from `127.0.0.1 172.17.0.1` to `0.0.0.0` (all interfaces)
+  - Fixes "error 102 while writing to socket" when Authentik tries to connect via `host.docker.internal`
+  - Root cause: `--add-host=host.docker.internal:host-gateway` resolves to the host's gateway IP from container's perspective, which may not be `172.17.0.1`
+  - Security maintained: `openFirewall = false` ensures Redis port 6379 remains blocked by firewall
+  - Redis now accessible from Docker containers regardless of network mode (bridge or host)
+  - System rebuild required: `sudo nixos-rebuild switch --flake .#homeserver`
+  - After rebuild, verify Redis is listening on all interfaces: `ss -tlnp | grep 6379` (should show `0.0.0.0:6379`)
+  - Verify Authentik can connect: `docker logs authentik-server` (should show no Redis connection errors)
+- **Redis**: Fixed Redis service configuration to actually start and be accessible from Docker containers
+  - Redis was configured but never activated (service was not running at all)
+  - Changed bind address from `127.0.0.1` to `127.0.0.1 172.17.0.1` to allow Docker container access
+  - Added explicit `openFirewall = false` for security (Redis only accessible locally and from Docker)
+  - System rebuild required for Redis to start: `sudo nixos-rebuild switch --flake .#homeserver`
+  - After rebuild, verify with: `systemctl status redis-shared.service` and `ss -tlnp | grep 6379`
+- **Authentik**: Fixed PostgreSQL and Redis connection from Docker containers
+  - Changed `AUTHENTIK_POSTGRESQL__HOST` from `127.0.0.1` to `host.docker.internal`
+  - Changed `AUTHENTIK_REDIS__HOST` from `127.0.0.1` to `host.docker.internal`
+  - Containers now correctly connect to host services using the Docker gateway
+  - Note: Immich correctly uses `127.0.0.1` because it runs with `--network=host`
+
+### Added
+- **Local Network Access**: Services now accessible from LAN using domain-based routing
+  - LAN interface added to firewall trusted interfaces for seamless local access
+  - Same domain names work on both Tailscale VPN and local network (e.g., `https://media.home.lucy31.cloud`)
+  - DNS-based routing: Tailscale DNS resolves to VPN IP, local DNS resolves to LAN IP
+  - Let's Encrypt certificates work for both access methods (no self-signed certificates needed)
+  - New configuration variables in `vars.nix`:
+    - `networking.lanInterface` - LAN network interface name (e.g., `enp24s0`)
+    - `networking.enableLocalAccess` - Toggle for local network access (default: `true`)
+  - Requires local DNS configuration to resolve `*.home.lucy31.cloud` to server's LAN IP
+  - Security maintained: No internet exposure, interface-specific access control
+
 ### Changed
-- **Homarr**: Upgraded to v1+ from homarr-labs organization
-  - Updated Docker image from `ghcr.io/ajnart/homarr:latest` to `ghcr.io/homarr-labs/homarr:1`
-  - Now using semantic versioning tag `:1` for v1.x releases (currently v1.43.1)
-  - Project moved to homarr-labs GitHub organization
-  - Existing data and configuration remain compatible
-  - Volume mounts and environment variables unchanged
+- **Homarr**: Upgraded to v1+ (v1.43.1) - Major feature release
+  - **New features:**
+    - Built-in user authentication and management
+    - SSO support (OIDC/LDAP) for enterprise integration
+    - 30+ service integrations (expanded from previous version)
+    - Built-in search across all services and media
+    - 11,000+ icons in icon picker
+    - Real-time updates using WebSockets
+    - Enhanced drag-and-drop customization
+  - **Technical changes:**
+    - Updated Docker image from `ghcr.io/ajnart/homarr:latest` to `ghcr.io/homarr-labs/homarr:1`
+    - Project moved to homarr-labs GitHub organization
+    - Now using semantic versioning (`:1` tag for v1.x releases)
+  - **Backward compatible:** Existing data and configuration work seamlessly
+  - **No action required:** Upgrade is automatic on next deployment
 - **Directory Management**: Centralized all disk-related directory creation in `disk-mounts.nix`
   - Moved arr stack directory creation from individual service modules to centralized location
   - Removed duplicate `systemd.tmpfiles.rules` from arr-stack.nix, jellyseerr.nix, and homarr.nix

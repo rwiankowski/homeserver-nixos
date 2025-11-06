@@ -32,7 +32,7 @@ in {
       trustedInterfaces = [ 
         "tailscale0" 
         "docker0"
-      ];
+      ] ++ lib.optionals vars.networking.enableLocalAccess [ vars.networking.lanInterface ];
       checkReversePath = "loose";
     };
   };

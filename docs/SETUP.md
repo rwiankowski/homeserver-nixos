@@ -447,8 +447,29 @@ nixos-rebuild switch --flake .#homeserver
 cscli console status
 ```
 
-### 6.4 Test HTTPS Access
+### 6.4 Configure Local Network Access (Optional)
 
+If you want to access services from your local network without Tailscale:
+
+```bash
+# Find your network interface name
+ip link
+# Look for the interface connected to your LAN (e.g., ens18, eth0)
+
+# Edit vars.nix and ensure these settings are configured:
+# networking.lanInterface = "ens18";  # Your interface name
+# networking.enableLocalAccess = true;
+# networking.localHostname = "homeserver.local";
+
+# Rebuild to apply changes
+sudo nixos-rebuild switch --flake .#homeserver
+```
+
+**See [LOCAL_NETWORK_ACCESS.md](LOCAL_NETWORK_ACCESS.md) for complete documentation.**
+
+### 6.5 Test HTTPS Access
+
+**From Tailscale VPN:**
 ```bash
 # From your laptop (connected to Tailscale)
 curl -I https://home.home.yourdomain.com
@@ -461,7 +482,21 @@ curl -I https://home.home.yourdomain.com
 open https://home.home.yourdomain.com
 ```
 
-### 6.5 Quick Setup for New Services (v2.0+)
+**From Local Network (if enabled):**
+```bash
+# From any device on your LAN (no Tailscale needed)
+curl -I https://homeserver.local/
+
+# Should show:
+# HTTP/2 200
+# May show certificate warning (expected for internal CA)
+
+# Open in browser
+open https://homeserver.local/
+# Access services: https://homeserver.local/jellyfin, etc.
+```
+
+### 6.6 Quick Setup for New Services (v2.0+)
 
 If you're deploying version 2.0.0 or later, configure these new services:
 

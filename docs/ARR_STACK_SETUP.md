@@ -965,18 +965,33 @@ Let's make sure everything works end-to-end!
 **Time required:** 10 minutes  
 **URL:** `https://homarr.home.yourdomain.com`
 
-Homarr provides a beautiful dashboard to monitor all your services.
+Homarr provides a modern, feature-rich dashboard to monitor and manage all your services.
 
-**Note:** This server uses Homarr v1+ from the homarr-labs organization, which includes many improvements over the legacy version including better authentication, more integrations, and enhanced customization options.
+**Note:** This server uses Homarr v1+ (currently v1.43.1), which includes significant improvements over the legacy version:
+- Built-in user authentication and management
+- SSO support (OIDC/LDAP) for enterprise integration
+- 30+ service integrations with real-time updates
+- Built-in search across all your services
+- 11,000+ icons in the icon picker
+- WebSocket-based real-time updates
+- Enhanced drag-and-drop customization
 
 #### Initial Setup
 
-1. Open Homarr web interface
-2. You'll see a default dashboard or setup wizard
+1. **First Visit**
+   - Open Homarr web interface
+   - You may be prompted to create an account (if authentication is enabled)
+   - Otherwise, you'll see a default dashboard
+
+2. **Enable Authentication** (Recommended for shared servers)
+   - Settings → Users
+   - Create user accounts for family members
+   - Set different permission levels
+   - Each user gets their own customizable dashboard
 
 #### Customise Dashboard
 
-1. Click the **Edit** button (pencil icon)
+1. Click the **Edit** button (pencil icon) to enter edit mode
 2. **Add tiles** for your services:
    - Jellyfin
    - Jellyseerr
@@ -984,32 +999,131 @@ Homarr provides a beautiful dashboard to monitor all your services.
    - Radarr
    - Prowlarr
    - qBittorrent
-3. Drag tiles to arrange them
-4. Click **Save**
+   - Readarr
+   - Lidarr
+   - Bazarr
+3. **Drag and drop** tiles to arrange them
+4. **Resize tiles** by dragging corners
+5. Click **Save** when finished
+
+💡 **Tip:** Use the built-in search (11K+ icons) to find perfect icons for each service!
 
 #### Add Service Integrations
 
-For live stats and monitoring:
+Homarr v1+ supports 30+ integrations for live stats and monitoring:
 
+**For *arr Apps (Sonarr, Radarr, Readarr, Lidarr):**
 1. **Edit mode** → Click on a service tile
-2. **Integration settings:**
+2. **Integration** tab:
+   - **Type:** Select service type (Sonarr, Radarr, etc.)
    - **URL:** `http://localhost:PORT`
-   - **API Key:** (from service settings)
-3. **Save**
+   - **API Key:** (from service Settings → General)
+3. **Test** connection
+4. **Save**
 
-Repeat for each service.
+Shows live data:
+- Queue status and active downloads
+- Missing/wanted items count
+- Recent additions
+- Upcoming releases calendar
+
+**For qBittorrent:**
+1. Add service tile
+2. **Integration** tab:
+   - **Type:** qBittorrent
+   - **URL:** `http://localhost:8282`
+   - **Username:** `admin`
+   - **Password:** (your qBittorrent password)
+3. **Test** and **Save**
+
+Shows:
+- Active torrents
+- Download/upload speeds
+- Queue status
+
+**For Jellyfin:**
+1. Add service tile
+2. **Integration** tab:
+   - **Type:** Jellyfin
+   - **URL:** `http://localhost:8096`
+   - **API Key:** (from Jellyfin dashboard)
+3. **Test** and **Save**
+
+Shows:
+- Currently playing media
+- Active streams
+- Library statistics
 
 #### Add Widgets
 
-1. **Edit mode** → **Add Widget**
-2. Choose widgets:
-   - **Calendar** - Upcoming releases
-   - **Media Requests** - Jellyseerr stats
-   - **Download Speed** - qBittorrent stats
-   - **System Resources** - CPU, RAM, disk usage
-3. Configure and save
+Homarr v1+ includes powerful widgets for enhanced functionality:
 
-✅ **Homarr is configured!** You now have a beautiful dashboard.
+1. **Edit mode** → **Add Widget**
+2. **Available widgets:**
+   - **Calendar** - Upcoming releases from Sonarr/Radarr
+   - **Media Requests** - Jellyseerr request statistics
+   - **Download Speed** - Real-time qBittorrent stats
+   - **System Resources** - CPU, RAM, disk usage
+   - **Weather** - Local weather information
+   - **RSS Feeds** - News and updates
+   - **Docker** - Container status (auto-detected via socket)
+   - **Search** - Search across all integrated services
+3. Configure widget settings
+4. Position and resize as needed
+5. **Save**
+
+#### Built-in Search
+
+One of v1+'s best features:
+
+1. Click the search icon or press `/`
+2. Search across:
+   - All integrated services
+   - Jellyfin media library
+   - Sonarr/Radarr content
+   - Your bookmarks
+3. Quick access to any service or media
+
+#### User Management (For Families)
+
+Perfect for shared servers:
+
+1. **Settings** → **Users**
+2. **Create accounts** for family members
+3. **Set permissions:**
+   - View-only access
+   - Edit dashboard
+   - Manage integrations
+   - Admin access
+4. Each user can customize their own dashboard!
+
+#### SSO Integration (Advanced)
+
+Homarr v1+ supports enterprise SSO:
+
+1. **Settings** → **Authentication**
+2. Configure OIDC or LDAP
+3. Connect to Authentik (if you're using it)
+4. Users can sign in with SSO credentials
+
+💡 **Tip:** If you're using Authentik for other services, you can integrate Homarr for unified authentication!
+
+#### Real-time Updates
+
+Homarr v1+ uses WebSockets for live updates:
+- Download progress updates automatically
+- Queue changes reflect instantly
+- No need to refresh the page
+- Smooth, responsive experience
+
+✅ **Homarr is configured!** You now have a powerful, feature-rich dashboard.
+
+**What makes v1+ special:**
+- Much faster and more responsive than the legacy version
+- Better mobile experience
+- More reliable integrations
+- Active development and regular updates
+- Growing community and plugin ecosystem
 
 ---
 

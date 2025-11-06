@@ -26,7 +26,7 @@ A complete, production-ready NixOS configuration for self-hosting 20+ services w
 - **Home Assistant** - Home automation platform
 - **Mealie** - Recipe manager and meal planner
 - **Homepage** - Beautiful dashboard for all services
-- **Homarr** - Modern dashboard with service monitoring
+- **Homarr** - Advanced dashboard with built-in authentication and 30+ integrations
 
 ### 🤖 AI & LLM
 - **Open WebUI** - ChatGPT-like interface
@@ -36,7 +36,8 @@ A complete, production-ready NixOS configuration for self-hosting 20+ services w
 ### 🔐 Security & Infrastructure
 - **Authentik** - Single sign-on (SSO) provider
 - **CrowdSec** - Collaborative threat protection
-- **Tailscale** - Zero-config VPN
+- **Tailscale** - Zero-config VPN (remote access)
+- **Local Network Access** - Direct LAN access with domain-based routing
 - **Caddy** - Automatic HTTPS reverse proxy
 - **PostgreSQL** - Centralized database
 - **pgAdmin** - Database management interface
@@ -64,8 +65,14 @@ A complete, production-ready NixOS configuration for self-hosting 20+ services w
 │  └──────────┘  └──────────┘  └──────────┘  └──────────┘       │
 └───────────────────────────────┬─────────────────────────────────┘
                                 │
-                                │ HTTPS (Let's Encrypt)
-                                │ *.home.yourdomain.com
+                    ┌───────────┴───────────┐
+                    │                       │
+          (Remote: Tailscale VPN)    (Local: LAN/WiFi)
+          *.home.yourdomain.com      *.home.yourdomain.com
+                    │                       │
+                    └───────────┬───────────┘
+                                │
+                                │ HTTPS (Let's Encrypt + Internal CA)
                                 │
 ┌───────────────────────────────┼─────────────────────────────────┐
 │                    Caddy Reverse Proxy                           │
@@ -145,7 +152,8 @@ sudo nixos-rebuild switch --flake .#homeserver
 ### Getting Started
 - **[Complete Setup Guide](docs/SETUP.md)** - Step-by-step deployment instructions
 - **[Azure Setup](docs/AZURE.md)** - Configure DNS, storage, and service principal
-- **[Tailscale Guide](docs/TAILSCALE.md)** - VPN configuration
+- **[Tailscale Guide](docs/TAILSCALE.md)** - VPN configuration for remote access
+- **[Local Network Access](docs/LOCAL_NETWORK_ACCESS.md)** - LAN access configuration
 - **[Secrets Management](docs/SOPS.md)** - Using sops-nix for secrets
 
 ### Service Configuration
@@ -172,14 +180,15 @@ sudo nixos-rebuild switch --flake .#homeserver
 
 ### Security Features
 
-- ✅ **No exposed ports** - Everything via Tailscale VPN
+- ✅ **No exposed ports** - Zero internet exposure, LAN + Tailscale only
+- ✅ **Dual access modes** - Remote (Tailscale) + Local (LAN with domain-based routing)
 - ✅ **Encrypted secrets** - sops-nix with age encryption
 - ✅ **SSH hardening** - Key-based only, no root login
 - ✅ **Automatic updates** - Weekly system updates
 - ✅ **Fail2ban** - Brute force protection
 - ✅ **CrowdSec** - Real-time threat detection and blocking
-- ✅ **SSL/TLS** - Let's Encrypt certificates for all services
-- ✅ **Firewall** - Minimal attack surface
+- ✅ **SSL/TLS** - Let's Encrypt + Internal CA for all services
+- ✅ **Firewall** - Interface-specific rules, minimal attack surface
 
 ### Storage Strategy
 

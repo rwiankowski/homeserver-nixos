@@ -31,6 +31,10 @@
     
     # Email for Let's Encrypt notifications
     acmeEmail = "rwiankowski@mac.com";
+    
+    # Local network access
+    lanInterface = "enp6s18";                # Your LAN network interface
+    enableLocalAccess = true;                # Enable access from local network (LAN)
   };
 
   # Service hostnames (subdomain part only)

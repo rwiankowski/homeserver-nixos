@@ -30,6 +30,11 @@
     homeSubdomain = "home";                  # Services will be at: *.home.yourdomain.com
     homeDomain = "home.yourdomain.com";      # Full domain for services
     acmeEmail = "you@email.com";             # Email for Let's Encrypt notifications
+    
+    # Local network access
+    lanInterface = "ens18";                  # Your LAN network interface (find with: ip link)
+    enableLocalAccess = true;                # Enable access from local network (LAN)
+    localHostname = "homeserver.local";      # mDNS hostname for local access
   };
 
   # Service hostnames (subdomain part only)

@@ -42,104 +42,395 @@ docker restart homepage
 **URL**: `https://homarr.home.yourdomain.com`  
 **Port**: 7575 (internal)
 
-Homarr is a modern, customisable dashboard with advanced features like service monitoring, Docker integration, and beautiful widgets.
+Homarr is a powerful, modern dashboard for managing and monitoring all your services. This server runs **Homarr v1+** (currently v1.43.1), which represents a major upgrade with enterprise-grade features.
+
+### What's New in v1+
+
+Homarr v1+ includes significant improvements over the legacy version:
+
+- ✅ **Built-in authentication** - User accounts and permission management
+- ✅ **SSO support** - OIDC and LDAP integration (works with Authentik)
+- ✅ **30+ integrations** - Expanded from the previous version
+- ✅ **Built-in search** - Search across all services and media
+- ✅ **11,000+ icons** - Massive icon library with search
+- ✅ **Real-time updates** - WebSocket-based live data
+- ✅ **Better performance** - Faster, more responsive interface
+- ✅ **Enhanced customization** - Improved drag-and-drop, widgets, themes
+
+**Backward compatible:** Your existing Homarr data and configuration work seamlessly with v1+.
 
 ### Initial Setup
 
 1. **First Visit**
-   - No authentication required initially
-   - You'll see a default dashboard
+   - Open Homarr web interface
+   - If authentication is enabled, create your admin account
+   - Otherwise, you'll see a default dashboard ready to customize
 
-2. **Add Services**
-   - Click "Edit" (pencil icon)
+2. **Enable User Management** (Recommended for shared servers)
+   - Settings → Users
+   - Create accounts for family members
+   - Set different permission levels (view-only, editor, admin)
+   - Each user gets their own personalized dashboard
+
+3. **Add Your First Service**
+   - Click "Edit" (pencil icon) to enter edit mode
    - Click "Add a tile"
    - Configure service:
-     - Name: e.g., "Jellyfin"
-     - URL: `https://jellyfin.home.yourdomain.com`
-     - Icon: Search for service icon
-     - Type: Select "Service"
+     - **Name:** e.g., "Jellyfin"
+     - **URL:** `https://jellyfin.home.yourdomain.com`
+     - **Icon:** Use the icon picker (11K+ icons!)
+     - **Type:** Select "Service"
    - Save tile
 
 ### Service Integration
 
-Homarr can integrate directly with many services to show live stats:
+Homarr v1+ supports **30+ integrations** with real-time monitoring:
 
-#### Sonarr/Radarr/Readarr/Lidarr Integration
+#### *arr Apps Integration (Sonarr, Radarr, Readarr, Lidarr)
 
 1. Add service tile
-2. Integration tab:
-   - Type: Select service type (Sonarr, Radarr, etc.)
-   - URL: `http://localhost:PORT`
-   - API Key: (from service settings)
-3. Save
+2. **Integration** tab:
+   - **Type:** Select service type (Sonarr, Radarr, etc.)
+   - **URL:** `http://localhost:PORT`
+   - **API Key:** (from service Settings → General)
+3. **Test** connection
+4. **Save**
 
-Now the tile shows:
-- Queue status
-- Missing items
-- Recent additions
-- Calendar
+**Live data shown:**
+- Queue status and active downloads
+- Missing/wanted items count
+- Recent additions to library
+- Upcoming releases calendar
+- Health and system status
 
 #### qBittorrent Integration
 
 1. Add service tile
-2. Integration tab:
-   - Type: qBittorrent
-   - URL: `http://localhost:8282`
-   - Username/Password: (your credentials)
-3. Save
+2. **Integration** tab:
+   - **Type:** qBittorrent
+   - **URL:** `http://localhost:8282`
+   - **Username:** `admin`
+   - **Password:** (your qBittorrent password)
+3. **Test** and **Save**
 
-Shows active torrents and download speed!
+**Live data shown:**
+- Active torrents with progress
+- Download/upload speeds
+- Queue status
+- Completed downloads
+
+#### Jellyfin Integration
+
+1. Add service tile
+2. **Integration** tab:
+   - **Type:** Jellyfin
+   - **URL:** `http://localhost:8096`
+   - **API Key:** (from Jellyfin Dashboard → API Keys)
+3. **Test** and **Save**
+
+**Live data shown:**
+- Currently playing media
+- Active streams and users
+- Library statistics
+- Recent additions
+
+#### Jellyseerr Integration
+
+1. Add service tile
+2. **Integration** tab:
+   - **Type:** Jellyseerr (or Overseerr)
+   - **URL:** `http://localhost:5055`
+   - **API Key:** (from Jellyseerr settings)
+3. **Test** and **Save**
+
+**Live data shown:**
+- Pending requests
+- Request statistics
+- Recently requested media
 
 #### Docker Integration
 
-Homarr has access to Docker socket and can show container status:
+Homarr v1+ has direct access to the Docker socket for container monitoring:
 
-1. Settings → Docker
-2. Enable Docker integration
-3. Containers will show status indicators
+1. **Automatic detection** - Containers are auto-discovered
+2. **Settings** → **Docker** → Enable integration
+3. Tiles automatically show container status indicators:
+   - 🟢 Running
+   - 🔴 Stopped
+   - 🟡 Restarting
+
+**Actions available:**
+- Start/stop containers (if permissions allow)
+- View container logs
+- Monitor resource usage
+
+### Built-in Search (v1+ Feature)
+
+One of the most powerful new features:
+
+1. **Access search:**
+   - Click the search icon in the header
+   - Or press `/` keyboard shortcut
+
+2. **Search across:**
+   - All integrated services
+   - Jellyfin media library
+   - Sonarr/Radarr content
+   - Your bookmarks and apps
+   - Web (if configured)
+
+3. **Quick actions:**
+   - Jump directly to any service
+   - Search for movies/TV shows
+   - Open service settings
+   - Launch integrations
+
+💡 **Tip:** The search feature makes Homarr your central hub for accessing everything!
 
 ### Widgets
 
-Add useful widgets to your dashboard:
+Homarr v1+ includes powerful widgets for enhanced functionality:
 
-1. **Weather Widget**
-   - Add widget → Weather
-   - Configure location
-   - Choose temperature units
+#### Available Widgets
 
-2. **Calendar Widget**
+1. **Calendar Widget**
    - Shows upcoming releases from Sonarr/Radarr
    - Auto-populated from integrations
+   - Click to view details
 
-3. **Media Requests**
-   - If Jellyseerr is configured
-   - Shows pending requests
+2. **Media Requests Widget**
+   - Displays Jellyseerr pending requests
+   - Shows request statistics
+   - Quick approve/deny actions
 
-4. **System Resources**
-   - CPU, RAM, disk usage
-   - Requires integration setup
+3. **Download Speed Widget**
+   - Real-time qBittorrent stats
+   - Upload/download graphs
+   - Active torrent count
+
+4. **System Resources Widget**
+   - CPU usage and temperature
+   - RAM usage
+   - Disk space
+   - Network activity
+
+5. **Weather Widget**
+   - Local weather information
+   - Forecast
+   - Customizable location and units
+
+6. **RSS Feed Widget**
+   - News and updates
+   - Custom RSS feeds
+   - Refresh intervals
+
+7. **Docker Widget**
+   - Container status overview
+   - Quick start/stop actions
+   - Resource monitoring
+
+#### Adding Widgets
+
+1. **Edit mode** → **Add Widget**
+2. Select widget type
+3. Configure settings (location, refresh rate, etc.)
+4. Position and resize
+5. **Save**
 
 ### Customisation
 
-- **Themes**: Settings → Appearance → Choose theme
-- **Layout**: Drag and drop tiles to rearrange
-- **Categories**: Group services into categories
-- **Background**: Settings → Appearance → Custom background
+Homarr v1+ offers extensive customization options:
+
+#### Themes
+- **Settings** → **Appearance** → **Theme**
+- Choose from built-in themes
+- Light/dark mode
+- Custom color schemes
+- Accent colors
+
+#### Layout
+- **Drag and drop** tiles to rearrange
+- **Resize tiles** by dragging corners
+- **Grid system** for precise alignment
+- **Responsive design** adapts to screen size
+
+#### Categories
+- **Group services** into logical categories
+- Create sections: Media, Productivity, System, etc.
+- Collapsible categories
+- Custom category icons
+
+#### Background
+- **Settings** → **Appearance** → **Background**
+- Solid colors
+- Gradients
+- Custom images
+- Unsplash integration
 
 ### Multiple Dashboards
 
 Create different dashboards for different purposes:
-- Media dashboard
-- Home automation dashboard
-- System monitoring dashboard
 
-### User Management
+1. **Media Dashboard**
+   - Jellyfin, Jellyseerr, *arr apps
+   - Download stats
+   - Upcoming releases
 
-1. Settings → Users
-2. Add users with different permission levels
-3. Share dashboard with family members
+2. **Home Automation Dashboard**
+   - Home Assistant
+   - Smart home controls
+   - Sensor data
 
-**Tip**: Homarr is great for users who want a more visual, interactive dashboard compared to Homepage's simplicity.
+3. **System Monitoring Dashboard**
+   - Docker containers
+   - System resources
+   - Logs and metrics
+
+**Switch between dashboards** using the dashboard selector in the header.
+
+### User Management & Permissions
+
+Perfect for families and shared servers:
+
+1. **Create Users**
+   - Settings → Users → Add User
+   - Set username and password
+   - Assign permission level
+
+2. **Permission Levels:**
+   - **View-only** - Can view dashboard, no editing
+   - **Editor** - Can customize their own dashboard
+   - **Manager** - Can manage integrations and settings
+   - **Admin** - Full access to everything
+
+3. **Personal Dashboards**
+   - Each user gets their own dashboard
+   - Customizations are per-user
+   - Share dashboards between users (optional)
+
+### SSO Integration (Advanced)
+
+Homarr v1+ supports enterprise-grade authentication:
+
+#### OIDC (OpenID Connect)
+
+1. **Settings** → **Authentication** → **OIDC**
+2. Configure provider (e.g., Authentik):
+   - **Issuer URL:** `https://authentik.home.yourdomain.com`
+   - **Client ID:** (from Authentik)
+   - **Client Secret:** (from Authentik)
+3. **Test** connection
+4. **Save**
+
+Users can now sign in with Authentik credentials!
+
+#### LDAP
+
+1. **Settings** → **Authentication** → **LDAP**
+2. Configure LDAP server:
+   - **Server URL:** `ldap://localhost:389`
+   - **Bind DN:** (from Authentik LDAP provider)
+   - **Search base:** (user search base)
+3. **Test** and **Save**
+
+💡 **Tip:** If you're using Authentik for other services, integrate Homarr for unified authentication across your entire homeserver!
+
+### Real-time Updates (v1+ Feature)
+
+Homarr v1+ uses WebSockets for instant updates:
+
+- ✅ Download progress updates automatically
+- ✅ Queue changes reflect instantly
+- ✅ Container status updates in real-time
+- ✅ No page refresh needed
+- ✅ Smooth, responsive experience
+
+**Technical note:** WebSocket connection is established automatically. Check browser console if updates aren't working.
+
+### Mobile Experience
+
+Homarr v1+ is fully responsive:
+
+- **Touch-optimized** interface
+- **Swipe gestures** for navigation
+- **Mobile-friendly** widgets
+- **PWA support** - Add to home screen
+- **Fast performance** on mobile devices
+
+### Comparison: Homarr vs Homepage
+
+Both dashboards are available on this server. Choose based on your needs:
+
+| Feature | Homarr v1+ | Homepage |
+|---------|-----------|----------|
+| **Setup** | Web UI configuration | File-based (YAML) |
+| **Integrations** | 30+ with live data | Basic service links |
+| **Authentication** | Built-in users & SSO | None (relies on proxy) |
+| **Customization** | Drag-and-drop, themes | Edit YAML files |
+| **Search** | Built-in across services | None |
+| **Real-time updates** | Yes (WebSockets) | No |
+| **Best for** | Interactive, feature-rich | Simple, minimal |
+
+**Recommendation:** Use **Homarr** for a powerful, interactive dashboard. Use **Homepage** if you prefer simplicity and file-based configuration.
+
+### Troubleshooting
+
+#### Integrations Not Working
+
+1. **Check service is running:** `systemctl status servicename`
+2. **Verify API key** is correct (copy from service settings)
+3. **Use localhost URLs** not external URLs (`http://localhost:PORT`)
+4. **Check logs:** Browser console for errors
+5. **Test connection** using the Test button
+
+#### Docker Integration Issues
+
+1. **Verify socket mount:** Check `/var/run/docker.sock` is mounted
+2. **Check permissions:** Homarr container needs read access
+3. **Restart container:** `docker restart homarr`
+
+#### Real-time Updates Not Working
+
+1. **Check WebSocket connection** in browser console
+2. **Verify no proxy issues** blocking WebSocket
+3. **Clear browser cache** and reload
+4. **Check Homarr logs:** `docker logs homarr`
+
+#### Authentication Problems
+
+1. **Reset admin password** via container environment variables
+2. **Check SSO configuration** matches provider settings
+3. **Verify callback URLs** are correct
+4. **Test provider** connection separately
+
+### Advanced Configuration
+
+For advanced users who want to customize further:
+
+**Environment Variables:**
+- Edit `/etc/nixos/modules/homarr.nix`
+- Add custom environment variables
+- Rebuild: `sudo nixos-rebuild switch --flake .#homeserver`
+
+**Data Location:**
+- Configs: `/mnt/shared/homarr/configs`
+- Icons: `/mnt/shared/homarr/icons`
+- Data: `/mnt/shared/homarr/data`
+- Backed up automatically via Restic
+
+**Docker Socket Access:**
+- Homarr has read-only access to Docker socket
+- Enables container monitoring and management
+- Security: Socket is mounted as read-only (`:ro`)
+
+### Getting Help
+
+- **Official Docs:** [Homarr Documentation](https://homarr.dev/docs)
+- **GitHub:** [homarr-labs/homarr](https://github.com/homarr-labs/homarr)
+- **Discord:** Join the Homarr community
+- **Issues:** Report bugs on GitHub
+
+**Tip:** Homarr v1+ is actively developed with regular updates. Check the GitHub releases for new features!
 
 ---
 
