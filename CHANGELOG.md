@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Homarr**: Added required SECRET_ENCRYPTION_KEY environment variable to fix internal server errors
+  - Homarr v1+ requires a 64-character hex encryption key for authentication and session management
+  - Added `homarr/secret_key` secret definition in `modules/secrets.nix`
+  - Created `homarr-env` template to securely inject SECRET_ENCRYPTION_KEY via sops-nix
+  - Updated Homarr container configuration to use `environmentFiles` for secret management
+  - Added example entry in `secrets/secrets.yaml.example`
+  - **Action required**: Generate and add secret key to `secrets/secrets.yaml`:
+    ```bash
+    # Generate a 64-character hex string (32 bytes = 64 hex characters)
+    openssl rand -hex 32
+    ```
+  - Example output: `a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456`
+  - Add the generated key to `secrets/secrets.yaml` under `homarr.secret_key`
+  - Edit secrets: `sops secrets/secrets.yaml`
+  - System rebuild required: `sudo nixos-rebuild switch --flake .#homeserver`
+  - Verify Homarr is working: Check container logs with `docker logs homarr`
+- **Local Network Access**: Fixed Caddy configuration to properly listen on LAN interface
+  - Added explicit `http_port` and `https_port` directives to Caddy global config
+  - Ensures Caddy listens on all interfaces (0.0.0.0) for both Tailscale and LAN access
+  - Fixes issue where services were not accessible from LAN using domain names
+  - System rebuild required: `sudo nixos-rebuild switch`
+  - After rebuild, verify Caddy is listening on all interfaces: `sudo ss -tlnp | grep caddy`
 - **Redis**: Disabled protected mode to allow Docker container connections (fixes error 104)
   - Added `settings = { protected-mode = "no"; }` to Redis configuration
   - Fixes "error 104 - Connection reset by peer" when Authentik containers try to connect

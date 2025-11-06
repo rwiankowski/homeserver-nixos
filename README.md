@@ -40,6 +40,7 @@ A complete, production-ready NixOS configuration for self-hosting 20+ services w
 - **Local Network Access** - Direct LAN access with domain-based routing
 - **Caddy** - Automatic HTTPS reverse proxy
 - **PostgreSQL** - Centralized database
+- **Redis** - Shared caching layer for services
 - **pgAdmin** - Database management interface
 - **Grafana** - Monitoring and metrics
 
@@ -97,16 +98,21 @@ A complete, production-ready NixOS configuration for self-hosting 20+ services w
         │                       │                       │
         └───────────────────────┼───────────────────────┘
                                 │
-                    ┌───────────▼──────────┐
-                    │  PostgreSQL Database │
-                    │  (Centralized)       │
-                    └──────────────────────┘
+                     ┌───────────▼──────────┐
+                     │  PostgreSQL Database │
+                     │  (Centralized)       │
+                     └──────────┬───────────┘
                                 │
-                    ┌───────────▼──────────┐
-                    │   Multi-Disk Storage │
-                    │  📀 SSD: Docs/Photos │
-                    │  💿 HDD: Media       │
-                    └──────────────────────┘
+                     ┌──────────▼───────────┐
+                     │   Redis Cache        │
+                     │   (Shared)           │
+                     └──────────┬───────────┘
+                                │
+                     ┌──────────▼───────────┐
+                     │   Multi-Disk Storage │
+                     │  📀 SSD: Docs/Photos │
+                     │  💿 HDD: Media       │
+                     └──────────────────────┘
                                 │
                     ┌───────────▼──────────┐
                     │   Restic Backups     │

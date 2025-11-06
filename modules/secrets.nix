@@ -105,6 +105,10 @@
     	owner = "root";
     	mode = "0400";
       };
+      "homarr/secret_key" = {
+        owner = "root";
+        mode = "0400";
+      };
     };
     
      # Templates for environment files
@@ -151,6 +155,14 @@
         content = ''
           AZURE_ACCOUNT_NAME=${config.sops.placeholder."restic/azure_account_name"}
           AZURE_ACCOUNT_KEY=${config.sops.placeholder."restic/azure_account_key"}
+        '';
+        owner = "root";
+        mode = "0400";
+      };
+
+      "homarr-env" = {
+        content = ''
+          SECRET_ENCRYPTION_KEY=${config.sops.placeholder."homarr/secret_key"}
         '';
         owner = "root";
         mode = "0400";

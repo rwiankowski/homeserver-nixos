@@ -1,0 +1,30 @@
+[0;1;32m●[0m postgresql.service - PostgreSQL Server
+     Loaded: loaded (]8;;file://nixtromo/etc/systemd/system/postgresql.service\/etc/systemd/system/postgresql.service]8;;\; [0;1;32menabled[0m; preset: ignored)
+     Active: [0;1;32mactive (running)[0m since Thu 2025-11-06 21:25:59 CET; 7min ago
+ Invocation: 557bb08357e04dd1b2bdf8a2c8270ef6
+    Process: 416548 ExecStartPre=/nix/store/3d25by3sh36p2hc38ab3f068ym1k0004-unit-script-postgresql-pre-start/bin/postgresql-pre-start (code=exited, status=0/SUCCESS)
+    Process: 416560 ExecStartPost=/nix/store/x9620xm435ahvgal826h8cg2shws982g-unit-script-postgresql-post-start/bin/postgresql-post-start (code=exited, status=0/SUCCESS)
+   Main PID: 416552 (.postgres-wrapp)
+         IP: 0B in, 0B out
+         IO: 32K read, 1.1M written
+      Tasks: 6[0;38;5;245m (limit: 77067)[0m
+     Memory: 46.9M (peak: 50M)
+        CPU: 505ms
+     CGroup: /system.slice/postgresql.service
+             ├─[0;38;5;245m416552 /nix/store/wdllpvlk4q2rz7fka9h2v7rbklw9qs7s-postgresql-and-plugins-16.10/bin/postgres[0m
+             ├─[0;38;5;245m416554 "postgres: checkpointer "[0m
+             ├─[0;38;5;245m416555 "postgres: background writer "[0m
+             ├─[0;38;5;245m416557 "postgres: walwriter "[0m
+             ├─[0;38;5;245m416558 "postgres: autovacuum launcher "[0m
+             └─[0;38;5;245m416559 "postgres: logical replication launcher "[0m
+
+Nov 06 21:25:59 nixtromo postgresql-post-start[416581]: ALTER DATABASE
+Nov 06 21:25:59 nixtromo postgresql-post-start[416586]: ALTER ROLE
+Nov 06 21:25:59 nixtromo postgresql-post-start[416588]: ALTER DATABASE
+Nov 06 21:25:59 nixtromo postgresql-post-start[416593]: ALTER ROLE
+Nov 06 21:25:59 nixtromo postgresql-post-start[416595]: ALTER DATABASE
+Nov 06 21:25:59 nixtromo postgresql-post-start[416600]: ALTER ROLE
+Nov 06 21:25:59 nixtromo postgresql-post-start[416602]: ALTER DATABASE
+Nov 06 21:25:59 nixtromo systemd[1]: Started PostgreSQL Server.
+Nov 06 21:30:59 nixtromo postgres[416554]: [416554] LOG:  checkpoint starting: time
+Nov 06 21:31:02 nixtromo postgres[416554]: [416554] LOG:  checkpoint complete: wrote 35 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.325 s, sync=0.012 s, total=3.358 s; sync files=26, longest=0.009 s, average=0.001 s; distance=155 kB, estimate=155 kB; lsn=0/42CB2BB8, redo lsn=0/42CB2B80

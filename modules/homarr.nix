@@ -8,7 +8,8 @@ in {
   virtualisation.oci-containers.containers.homarr = {
     # Homarr v1+ from homarr-labs organization
     # https://github.com/homarr-labs/homarr
-    image = "ghcr.io/homarr-labs/homarr:1";
+    image = "ghcr.io/homarr-labs/homarr:latest";
+    environmentFiles = [ config.sops.templates."homarr-env".path ];
     environment = {
       TZ = vars.system.timezone;
       BASE_URL = "https://${vars.services.homarr}.${vars.networking.homeDomain}";

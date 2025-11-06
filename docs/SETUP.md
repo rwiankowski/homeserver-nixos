@@ -218,6 +218,21 @@ sops secrets/secrets.yaml
 
 Fill in all the secrets (see [SOPS.md](SOPS.md) for details on getting each credential).
 
+**Important secrets to generate:**
+
+#### Homarr Encryption Key
+
+Homarr v1+ requires a 64-character hex encryption key for authentication and session management:
+
+```bash
+# Generate encryption key (32 bytes = 64 hex characters)
+openssl rand -hex 32
+
+# Example output: a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+```
+
+Add this to `secrets/secrets.yaml` under `homarr.secret_key`.
+
 ---
 
 ## Phase 4: Customize Configuration
@@ -388,9 +403,14 @@ Expected output:
 systemctl status tailscaled
 systemctl status caddy
 systemctl status postgresql
+systemctl status redis-shared.service
 systemctl status crowdsec
 
 # All should show "active (running)"
+
+# Test Redis
+redis-cli ping
+# Should return: PONG
 
 # Check if you can still SSH
 # (you should be logged in, but verify)
@@ -454,18 +474,19 @@ If you want to access services from your local network without Tailscale:
 ```bash
 # Find your network interface name
 ip link
-# Look for the interface connected to your LAN (e.g., ens18, eth0)
+# Look for the interface connected to your LAN (e.g., ens18, enp24s0, eth0)
 
 # Edit vars.nix and ensure these settings are configured:
 # networking.lanInterface = "ens18";  # Your interface name
 # networking.enableLocalAccess = true;
-# networking.localHostname = "homeserver.local";
 
 # Rebuild to apply changes
 sudo nixos-rebuild switch --flake .#homeserver
 ```
 
-**See [LOCAL_NETWORK_ACCESS.md](LOCAL_NETWORK_ACCESS.md) for complete documentation.**
+**Important:** You'll also need to configure local DNS to resolve `*.home.yourdomain.com` to your server's LAN IP address. This enables the same domain names to work on both Tailscale and your local network.
+
+**See [LOCAL_NETWORK_ACCESS.md](LOCAL_NETWORK_ACCESS.md) for complete documentation including DNS setup.**
 
 ### 6.5 Test HTTPS Access
 
@@ -485,20 +506,44 @@ open https://home.home.yourdomain.com
 **From Local Network (if enabled):**
 ```bash
 # From any device on your LAN (no Tailscale needed)
-curl -I https://homeserver.local/
+curl -I https://home.home.yourdomain.com
 
 # Should show:
 # HTTP/2 200
-# May show certificate warning (expected for internal CA)
+# No certificate warnings (uses Let's Encrypt!)
 
 # Open in browser
-open https://homeserver.local/
-# Access services: https://homeserver.local/jellyfin, etc.
+open https://home.home.yourdomain.com
+# Same URLs work on both Tailscale and LAN!
 ```
+
+**Note:** Local network access uses the same domain names as Tailscale (domain-based routing), not path-based routing. See [LOCAL_NETWORK_ACCESS.md](LOCAL_NETWORK_ACCESS.md) for details.
 
 ### 6.6 Quick Setup for New Services (v2.0+)
 
 If you're deploying version 2.0.0 or later, configure these new services:
+
+#### Homarr - CRITICAL SETUP STEP
+
+**⚠️ Encryption key required before Homarr will start!**
+
+Homarr v1+ requires a 64-character hex encryption key. If you haven't already:
+
+```bash
+# Generate encryption key
+openssl rand -hex 32
+
+# Add to secrets.yaml
+sops secrets/secrets.yaml
+# Add: homarr.secret_key: "your-generated-key"
+
+# Rebuild
+sudo nixos-rebuild switch --flake .#homeserver
+
+# Verify Homarr is running
+docker ps | grep homarr
+docker logs homarr
+```
 
 #### qBittorrent - CRITICAL SECURITY STEP
 

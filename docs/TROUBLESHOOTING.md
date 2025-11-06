@@ -565,6 +565,156 @@ sudo chown -R media:media /mnt/media/jellyfin/music
 journalctl -u lidarr -f
 ```
 
+### Authentik
+
+**Container won't start**:
+
+```bash
+# Check Docker
+systemctl status docker
+
+# Check logs
+docker logs authentik-server
+docker logs authentik-worker
+
+# Common issues:
+# - PostgreSQL not running
+# - Redis not running
+# - Database connection errors
+```
+
+**Can't connect to PostgreSQL**:
+
+```bash
+# Verify PostgreSQL is running
+systemctl status postgresql
+
+# Check PostgreSQL is listening
+ss -tlnp | grep 5432
+
+# Test connection from host
+sudo -u postgres psql -l
+
+# Verify Authentik database exists
+sudo -u postgres psql -c "\l" | grep authentik
+
+# Check Docker can reach PostgreSQL
+# Authentik uses host.docker.internal:5432
+docker exec authentik-server ping -c 1 host.docker.internal
+```
+
+**Can't connect to Redis**:
+
+```bash
+# Verify Redis is running
+systemctl status redis-shared.service
+
+# Check Redis is listening on all interfaces
+ss -tlnp | grep 6379
+# Should show: 0.0.0.0:6379
+
+# Test Redis connection
+redis-cli ping
+# Should return: PONG
+
+# Check Docker can reach Redis
+# Authentik uses host.docker.internal:6379
+docker exec authentik-server nc -zv host.docker.internal 6379
+```
+
+**Error 104 - Connection reset by peer**:
+
+```bash
+# This indicates Redis protected mode is blocking connections
+# Verify protected mode is disabled
+redis-cli CONFIG GET protected-mode
+# Should return: "no"
+
+# If it returns "yes", check modules/database.nix
+# Should have: protected-mode = "no"
+
+# Rebuild if needed
+sudo nixos-rebuild switch --flake .#homeserver
+```
+
+**Error 102 - Cannot write to socket**:
+
+```bash
+# This indicates Redis bind address issue
+# Verify Redis is bound to all interfaces
+ss -tlnp | grep 6379
+# Should show: 0.0.0.0:6379 (not 127.0.0.1:6379)
+
+# Check Redis configuration
+redis-cli CONFIG GET bind
+# Should return: "0.0.0.0" or empty (binds to all)
+
+# If incorrect, check modules/database.nix
+# Should have: bind = null;
+
+# Rebuild if needed
+sudo nixos-rebuild switch --flake .#homeserver
+```
+
+### Redis
+
+**Service won't start**:
+
+```bash
+# Check status
+systemctl status redis-shared.service
+
+# Check logs
+journalctl -u redis-shared.service -n 50
+
+# Common issues:
+# - Port 6379 already in use
+# - Permission errors
+# - Configuration syntax errors
+```
+
+**Can't connect from Docker containers**:
+
+```bash
+# Verify Redis is listening on all interfaces
+ss -tlnp | grep 6379
+# Should show: 0.0.0.0:6379
+
+# Test from host
+redis-cli ping
+# Should return: PONG
+
+# Check protected mode is disabled
+redis-cli CONFIG GET protected-mode
+# Should return: "no"
+
+# Test Docker networking
+docker run --rm --add-host=host.docker.internal:host-gateway redis:alpine redis-cli -h host.docker.internal ping
+# Should return: PONG
+```
+
+**Protected mode errors**:
+
+```bash
+# If you see "DENIED Redis is running in protected mode"
+# This means protected-mode is enabled
+
+# Check current setting
+redis-cli CONFIG GET protected-mode
+
+# Should be "no" - if not, check modules/database.nix
+# Should have:
+# settings = {
+#   protected-mode = "no";
+# };
+
+# Rebuild system
+sudo nixos-rebuild switch --flake .#homeserver
+
+# Verify change
+redis-cli CONFIG GET protected-mode
+```
+
 ### Homarr
 
 **Container won't start**:
@@ -576,12 +726,33 @@ systemctl status docker
 # Check logs
 docker logs homarr
 
+# Common issue: Missing encryption key
+# Verify homarr/secret_key is in secrets.yaml
+# Generate with: openssl rand -hex 32
+
 # Check permissions
 ls -la /mnt/shared/homarr
 sudo chown -R root:root /mnt/shared/homarr
 
 # Restart
 docker restart homarr
+```
+
+**Internal server error (500)**:
+
+```bash
+# Most common cause: Missing SECRET_ENCRYPTION_KEY
+# Check logs for encryption key errors
+docker logs homarr | grep -i "secret\|encryption"
+
+# Verify secret is configured
+sudo cat /run/secrets-rendered/homarr-env
+# Should show: SECRET_ENCRYPTION_KEY=...
+
+# If missing, add to secrets.yaml and rebuild
+sops secrets/secrets.yaml
+# Add: homarr.secret_key: "your-64-char-hex-key"
+sudo nixos-rebuild switch --flake .#homeserver
 ```
 
 **Can't access Docker socket**:

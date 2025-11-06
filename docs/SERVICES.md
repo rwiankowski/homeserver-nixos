@@ -44,6 +44,20 @@ docker restart homepage
 
 Homarr is a powerful, modern dashboard for managing and monitoring all your services. This server runs **Homarr v1+** (currently v1.43.1), which represents a major upgrade with enterprise-grade features.
 
+### Prerequisites
+
+⚠️ **Encryption Key Required**: Homarr v1+ requires a 64-character hex encryption key for authentication and session management. This must be configured in `secrets/secrets.yaml` before Homarr will start.
+
+**Generate the key:**
+```bash
+openssl rand -hex 32
+```
+
+Add the generated key to `secrets/secrets.yaml` under `homarr.secret_key`, then rebuild:
+```bash
+sudo nixos-rebuild switch --flake .#homeserver
+```
+
 ### What's New in v1+
 
 Homarr v1+ includes significant improvements over the legacy version:
@@ -1076,6 +1090,112 @@ Now you can browse all databases!
 
 ---
 
+## Redis Cache
+
+**Port**: 6379 (internal only)  
+**No Web UI** - Redis is a backend service
+
+Redis provides shared caching for multiple services, improving performance and reducing database load.
+
+### Services Using Redis
+
+- **Authentik** - Session storage and caching
+- **Immich** (future) - Job queue and caching
+- Other services can be configured to use Redis as needed
+
+### Configuration
+
+Redis is configured to:
+- ✅ Listen on all interfaces (0.0.0.0) for Docker container access
+- ✅ Firewall blocks external access (port 6379 not exposed)
+- ✅ No password required (protected by firewall)
+- ✅ Protected mode disabled (allows Docker container connections)
+
+This configuration is secure because:
+- Firewall prevents internet access
+- Only localhost and Docker containers can connect
+- Standard approach for containerized environments
+
+### Accessing Redis
+
+**From the server:**
+```bash
+# Connect to Redis CLI
+redis-cli
+
+# Test connection
+redis-cli ping
+# Should return: PONG
+
+# Check connected clients
+redis-cli CLIENT LIST
+
+# Monitor commands in real-time
+redis-cli MONITOR
+```
+
+**From Docker containers:**
+
+Containers can access Redis using:
+- **Host networking**: `127.0.0.1:6379`
+- **Bridge networking**: `host.docker.internal:6379`
+
+### Troubleshooting
+
+**Check Redis is running:**
+```bash
+systemctl status redis-shared.service
+```
+
+**Check Redis is listening:**
+```bash
+ss -tlnp | grep 6379
+# Should show: 0.0.0.0:6379
+```
+
+**Test connection:**
+```bash
+redis-cli ping
+# Should return: PONG
+```
+
+**View logs:**
+```bash
+journalctl -u redis-shared.service -n 50
+```
+
+**Common issues:**
+
+1. **Connection refused from Docker container**
+   - Verify Redis is running: `systemctl status redis-shared.service`
+   - Check bind address: `ss -tlnp | grep 6379` (should show 0.0.0.0)
+   - Verify firewall isn't blocking: `sudo nft list ruleset | grep 6379`
+
+2. **Protected mode error**
+   - This should not occur with current configuration
+   - If it does, verify `protected-mode = "no"` in `modules/database.nix`
+
+3. **Performance issues**
+   - Check memory usage: `redis-cli INFO memory`
+   - Monitor slow queries: `redis-cli SLOWLOG GET 10`
+   - Check connected clients: `redis-cli CLIENT LIST`
+
+### Security Notes
+
+⚠️ **Redis has no password** - This is intentional and secure because:
+- Firewall blocks external access (port 6379 not in `allowedTCPPorts`)
+- Only accessible from localhost and Docker containers
+- No internet exposure
+- Standard practice for internal services with firewall protection
+
+If you want to add password authentication:
+1. Edit `modules/database.nix`
+2. Add `requirePass = "your-secure-password";` to Redis settings
+3. Update service configurations to use the password
+4. Rebuild: `sudo nixos-rebuild switch`
+
+---
+
 ## Service Dependencies
 
 Understanding service dependencies helps with troubleshooting:
@@ -1083,6 +1203,7 @@ Understanding service dependencies helps with troubleshooting:
 ```
 Authentik → Can provide SSO for all services
 PostgreSQL → Used by Authentik, Immich, NextCloud, Paperless
+Redis → Used by Authentik (sessions/cache), available for other services
 Prowlarr → Syncs indexers to Sonarr/Radarr/Readarr/Lidarr
 Sonarr/Radarr/Readarr/Lidarr → Send downloads to qBittorrent → Files go to Jellyfin
 Jellyseerr → Manages requests → Triggers Sonarr/Radarr → Downloads via qBittorrent

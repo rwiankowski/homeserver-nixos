@@ -33,7 +33,7 @@
     acmeEmail = "rwiankowski@mac.com";
     
     # Local network access
-    lanInterface = "enp6s18";                # Your LAN network interface
+    lanInterface = "ens18";                # Your LAN network interface
     enableLocalAccess = true;                # Enable access from local network (LAN)
   };
 

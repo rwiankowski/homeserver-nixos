@@ -60,6 +60,10 @@ in {
       servers {
         metrics
       }
+      
+      # Explicitly bind to all interfaces for both Tailscale and LAN access
+      http_port 80
+      https_port 443
     '';
     
     extraConfig = ''
